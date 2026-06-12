@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mundial 2026</title>
+  <style>
+    :root {
+      --azul:   #0A1F5C;
+      --rojo:   #C8102E;
+      --blanco: #FFFFFF;
+      --dorado: #D4A017;
+      --gris:   #1A1A2E;
+      --gris2:  #16213E;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #FFF8E7;
+      color: var(--blanco);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: #D4B896;
+      border-bottom: 3px solid var(--dorado);
+      padding: 30px 0 18px;
+      text-align: center;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      flex-wrap: wrap;
+    }
+
+    .pelota-wrap {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      overflow: hidden;
+      display: inline-block;
+      animation: girar 6s linear infinite;
+      filter: drop-shadow(0 0 12px rgba(212,160,23,0.6));
+      flex-shrink: 0;
+    }
+
+    .pelota {
+      width: 140%;
+      height: 140%;
+      object-fit: cover;
+      margin: -20% 0 0 -20%;
+    }
+
+    @keyframes girar {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    .titulo-texto h1 {
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: var(--blanco);
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .titulo-texto h1 span { color: var(--dorado); }
+
+    .en-directo {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--rojo);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      vertical-align: middle;
+      margin-left: 12px;
+      animation: pulso 1.2s ease-in-out infinite;
+    }
+
+    .en-directo::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      background: #fff;
+      border-radius: 50%;
+      animation: pulso-punto 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulso {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    @keyframes pulso-punto {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.4); }
+    }
+
+    .titulo-texto .subtitulo {
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-top: 6px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    /* BARRA EN DIRECTO */
+    #barra-directo {
+      display: none;
+      background: #C4785A;
+      border-bottom: 2px solid var(--dorado);
+      padding: 8px 20px;
+    }
+
+    .directo-titulo {
+      color: var(--rojo);
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .directo-titulo::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--rojo);
+      border-radius: 50%;
+      animation: pulso-punto 1s infinite;
+      flex-shrink: 0;
+    }
+
+    .partido-directo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(200,16,46,0.3);
+      border-radius: 8px;
+      padding: 6px 14px;
+      margin: 2px 8px 2px 0;
+    }
+
+    .partido-directo .pd-pais {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .partido-directo .pd-pais img {
+      width: 24px;
+      height: 16px;
+      object-fit: cover;
+      border-radius: 2px;
+    }
+
+    .partido-directo .pd-marcador {
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--blanco);
+      letter-spacing: 2px;
+      padding: 0 4px;
+    }
+
+    .partido-directo .pd-min {
+      font-size: 0.72rem;
+      color: var(--rojo);
+      font-weight: 700;
+    }
+
+    /* SECCIONES */
+    .seccion {
+      padding: 30px 20px;
+      max-width: 1100px;
+      margin: 0;
+    }
+
+    .seccion h2 {
+      font-size: 1.4rem;
+      color: var(--dorado);
+      border-left: 4px solid #D4B896;
+      padding-left: 12px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* TARJETA GENÉRICA */
+    .tarjeta {
+      background: var(--gris2);
+      border: 1px solid #D4B896;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    /* GRUPOS */
+    .grupos-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    /* CALENDARIOS */
+    .calendarios {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 220px;
+    }
+
+    .calendario {
+      background: var(--gris2);
+      border: 1px solid #D4B896;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .cal-titulo {
+      background: var(--azul);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      padding: 8px 14px;
+      text-align: center;
+      border-bottom: 2px solid var(--rojo);
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
+      padding: 8px;
+    }
+
+    .cal-grid .dia-nombre {
+      text-align: center;
+      font-size: 0.65rem;
+      color: var(--dorado);
+      font-weight: 700;
+      padding: 2px 0 4px;
+    }
+
+    .cal-grid .dia {
+      text-align: center;
+      font-size: 0.75rem;
+      padding: 4px 2px;
+      border-radius: 4px;
+      color: var(--dorado);
+    }
+
+    .cal-grid .dia.vacio { background: transparent; }
+    .cal-grid .dia.grupo { background: rgba(10,31,92,0.7); color: var(--blanco); font-weight: 600; }
+    .cal-grid .dia.knockout { background: rgba(200,16,46,0.5); color: var(--blanco); font-weight: 600; }
+    .cal-grid .dia.hoy { background: #C2185B; color: #fff; font-weight: 900; border-radius: 50%; }
+    .cal-grid .dia.final { background: var(--dorado); color: var(--azul); font-weight: 900; }
+
+    .grupo-card {
+      background: #FDE8F0;
+      border: 1px solid #D4B896;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .grupo-card li { color: #000; }
+    .grupo-card span:not([style*="color"]) { color: #000; }
+
+    .grupo-card .grupo-titulo {
+      background: #D4B896;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 2px;
+      padding: 8px 14px;
+      border-bottom: 2px solid var(--dorado);
+    }
+
+    .grupo-card ul {
+      list-style: none;
+      padding: 10px 14px;
+    }
+
+    .grupo-card ul li {
+      padding: 5px 0;
+      font-size: 0.92rem;
+      border-bottom: 1px solid #D4B896;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grupo-card ul li:last-child { border-bottom: none; }
+
+    .grupo-card ul li img {
+      width: 28px;
+      height: 19px;
+      object-fit: cover;
+      border-radius: 2px;
+      border: 1px solid #444;
+      flex-shrink: 0;
+    }
+
+    /* QUINIELA */
+    .quiniela-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .quiniela-card {
+      background: #FDE8F0;
+      border: 1px solid #D4B896;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .quiniela-card .quiniela-nombre {
+      background: #D4B896;
+      color: #fff;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      padding: 10px 14px;
+      text-transform: uppercase;
+      border-bottom: 2px solid var(--dorado);
+    }
+
+    .quiniela-card ul {
+      list-style: none;
+      padding: 10px 14px;
+    }
+
+    .quiniela-card ul li {
+      padding: 5px 0;
+      font-size: 0.92rem;
+      border-bottom: 1px solid #D4B896;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #000;
+    }
+
+    .quiniela-card ul li:last-child { border-bottom: none; }
+
+    .quiniela-card ul li img {
+      width: 28px;
+      height: 19px;
+      object-fit: cover;
+      border-radius: 2px;
+      border: 1px solid #444;
+      flex-shrink: 0;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .grupos-grid { grid-template-columns: repeat(2, 1fr); }
+      .quiniela-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .titulo-texto h1 { font-size: 1.8rem; letter-spacing: 2px; }
+      .pelota-wrap { width: 70px; height: 70px; }
+      .header-top { gap: 12px; }
+      .seccion { padding: 20px 12px; }
+      .grupos-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .quiniela-grid { grid-template-columns: 1fr; }
+      .titulo-texto .subtitulo { font-size: 0.7rem; letter-spacing: 1px; }
+      #barra-directo { padding: 8px 12px; }
+      .partido-directo { padding: 5px 8px; gap: 6px; }
+      .partido-directo .pd-pais { font-size: 0.75rem; }
+    }
+
+    @media (max-width: 400px) {
+      .grupos-grid { grid-template-columns: 1fr; }
+      .titulo-texto h1 { font-size: 1.5rem; }
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #555;
+      font-size: 0.8rem;
+      border-top: 1px solid #D4B896;
+      margin-top: 40px;
+    }
+
+    footer span { color: var(--dorado); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <div class="pelota-wrap">
+        <img class="pelota" src="Pelota.png" alt="Pelota Mundial">
+      </div>
+      <div class="titulo-texto">
+        <h1>MUNDIAL <span>2026</span><span id="badge-directo" class="en-directo" style="display:none;">EN DIRECTO</span></h1>
+        <div class="subtitulo">USA &bull; Canada &bull; México</div>
+      </div>
+    </div>
+  </header>
+
+  <div id="barra-directo">
+    <div class="directo-titulo">EN DIRECTO</div>
+    <div id="partidos-vivo"></div>
+  </div>
+
+  <main>
+
+    <section id="grupos" class="seccion" style="max-width:none;">
+      <h2>Fase de Grupos</h2>
+      <div style="display:flex; gap:20px; align-items:flex-start;">
+      <div class="grupos-grid" style="flex-shrink:0; width:min(1060px, calc(100vw - 40px));">
+
+        <div class="grupo-card" id="grupo-A">
+          <div class="grupo-titulo">GRUPO A</div>
+          <ul>
+            <li><img src="https://flagcdn.com/w40/mx.png" alt="México"> México</li>
+            <li><img src="https://flagcdn.com/w40/za.png" alt="Sudáfrica"> Sudáfrica</li>
+            <li><img src="https://flagcdn.com/w40/kr.png" alt="Corea del Sur"> Corea del Sur</li>
+            <li><img src="https://flagcdn.com/w40/cz.png" alt="Chequia"> Chequia</li>
+          </ul>
+        </div>
+
+        <div class="grupo-card" id="grupo-B">
+          <div class="grupo-titulo">GRUPO B</div>
+          <ul>
+            <li><img src="https://flagcdn.com/w40/ca.png" alt="Canadá"> Canadá</li>
+            <li><img src="https://flagcdn.com/w40/ba.png" alt="Bosnia"> Bosnia y Herzegovina</li>
+            <li><img src="https://flagcdn.com/w40/qa.png" alt="Catar"> Catar</li>
+            <li><img src="https://flagcdn.com/w40/ch.png" alt="Suiza"> Suiza</li>
+          </ul>
+        </div>
+
+        <div class="grupo-card" id="grupo-C">
+          <div class="grupo-titulo">GRUPO C</div>
+          <ul>
+            <li><img src="https://flagcdn.com/w40/br.png" alt="Brasil"> Brasil</li>
+            <li><img src="https://flagcdn.com/w40/ma.png" alt="Marruecos"> Marruecos</li>
+            <li><img src="https://flagcdn.com/w40/gb-sct.png" alt="Escocia"> Escocia</li>
+            <li><img src="https://flagcdn.com/w40/ht.png" alt="Haití"> Haití</li>
+          </ul>
+        </div>
+
+        <div class="grupo-card" id="grupo-D">
+          <div class="grupo-titulo">GRUPO D</div>
+          <ul>
+            <li><img src="https://flagcdn.com/w40/us.png" alt="EEUU"> Estados Unidos</li>
+            <li><img src="https://flagcdn.com/w40/tr.png" alt="Turquía"> Turquía</li>
+            <li><img src="https://flagcdn.com/w40/py.png" alt="Paraguay"> Paraguay</li>
+            <li><img src="https://flagcdn.com/w40/au.png" alt="Australia"> Australia</li>
+          </ul>
+        </div>
+
+        <div class="grupo-card" id="grupo-E">
+          <div class="grupo-titulo">GRUPO E</div>
+          <ul>
+            <li><img src="https://flagcdn.com/w40/de.png" alt="Alemania"> Alemania</li>
+            <li><img src="https://flagcdn.com/w40/ec.png" alt="Ecuador"> Ecuador</li>
+            <li><img src="https://flagcdn.com/w40/cw.png" alt="Curazao"> Curazao</li>
+            <li><img src="https://flagcdn.com/w40/ci.png" alt="Costa de Marfil"> Costa de Marfil</li>
+          </ul>
+        </div>
+
+        <div class="grupo-card" id="grupo-F">
+          <div class="grupo-titulo">GRUPO F</div>
+          <ul>
+            <li><img src="https://flagcdn.com/w40/nl.png" alt="Países Bajos"> Países Bajos</li>
+            <li><img src="https://flagcdn.com/w40/jp.png" alt="Japón"> Japón</li>
+            <li><img src="https://flagcdn.com/w40/se.png" alt="Suecia"> Suecia</li>
+            <li><img src="https://flagcdn.com/w40/tn.png" alt="Túnez"> Túnez</li>
+          </ul>
+        </div>
+
+        <div class="grupo-card" id="grupo-G">
+          <div class="grupo-titulo">GRUPO G</div>
+          <ul>
+            <li><img src="https://flagcdn.com/w40/be.png" alt="Bélgica"> Bélgica</li>
+            <li><img src="https://flagcdn.com/w40/nz.png" alt="Nueva Zelanda"> Nueva Zelanda</li>
+            <li><img src="https://flagcdn.com/w40/ir.png" alt="Irán"> Irán</li>
+            <li><img src="https://flagcdn.com/w40/eg.png" alt="Egipto"> Egipto</li>
+          </ul>
+        </div>
+
+        <div class="grupo-card" id="grupo-H">
+          <div class="grupo-titulo">GRUPO H</div>
+          <ul>
+            <li><img src="https://flagcdn.com/w40/es.png" alt="España"> España</li>
+            <li><img src="https://flagcdn.com/w40/cv.png" alt="Cabo Verde"> Cabo Verde</li>
+            <li><img src="https://flagcdn.com/w40/sa.png" alt="Arabia Saudí"> Arabia Saudí</li>
+            <li><img src="https://flagcdn.com/w40/uy.png" alt="Uruguay"> Uruguay</li>
+          </ul>
+        </div>
+
+        <div class="grupo-card" id="grupo-I">
+          <div class="grupo-titulo">GRUPO I</div>
+          <ul>
+            <li><img src="https://flagcdn.com/w40/fr.png" alt="Francia"> Francia</li>
+            <li><img src="https://flagcdn.com/w40/sn.png" alt="Senegal"> Senegal</li>
+            <li><img src="https://flagcdn.com/w40/iq.png" alt="Irak"> Irak</li>
+            <li><img src="https://flagcdn.com/w40/no.png" alt="Noruega"> Noruega</li>
+          </ul>
+        </div>
+
+        <div class="grupo-card" id="grupo-J">
+          <div class="grupo-titulo">GRUPO J</div>
+          <ul>
+            <li><img src="https://flagcdn.com/w40/ar.png" alt="Argentina"> Argentina</li>
+            <li><img src="https://flagcdn.com/w40/at.png" alt="Austria"> Austria</li>
+            <li><img src="https://flagcdn.com/w40/jo.png" alt="Jordania"> Jordania</li>
+            <li><img src="https://flagcdn.com/w40/dz.png" alt="Argelia"> Argelia</li>
+          </ul>
+        </div>
+
+        <div class="grupo-card" id="grupo-K">
+          <div class="grupo-titulo">GRUPO K</div>
+          <ul>
+            <li><img src="https://flagcdn.com/w40/pt.png" alt="Portugal"> Portugal</li>
+            <li><img src="https://flagcdn.com/w40/co.png" alt="Colombia"> Colombia</li>
+            <li><img src="https://flagcdn.com/w40/uz.png" alt="Uzbekistán"> Uzbekistán</li>
+            <li><img src="https://flagcdn.com/w40/cd.png" alt="RD Congo"> RD Congo</li>
+          </ul>
+        </div>
+
+        <div class="grupo-card" id="grupo-L">
+          <div class="grupo-titulo">GRUPO L</div>
+          <ul>
+            <li><img src="https://flagcdn.com/w40/gb-eng.png" alt="Inglaterra"> Inglaterra</li>
+            <li><img src="https://flagcdn.com/w40/hr.png" alt="Croacia"> Croacia</li>
+            <li><img src="https://flagcdn.com/w40/gh.png" alt="Ghana"> Ghana</li>
+            <li><img src="https://flagcdn.com/w40/pa.png" alt="Panamá"> Panamá</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- CALENDARIO -->
+      <div style="flex:1; min-width:180px; background:#FDE8F0; border:1px solid #D4B896; border-radius:10px; overflow:hidden;">
+        <!-- Cabecera con flechas -->
+        <div style="background:#D4B896; color:#fff; font-weight:800; font-size:0.9rem; letter-spacing:2px; padding:10px 14px; text-align:center; border-bottom:2px solid var(--dorado); display:flex; align-items:center; justify-content:space-between;">
+          <button onclick="cambiarMes(-1)" style="background:none;border:none;color:var(--dorado);font-size:1.1rem;cursor:pointer;padding:0 6px;">&#8249;</button>
+          <span id="cal-titulo">JUNIO <span style="color:var(--dorado)">2026</span></span>
+          <button onclick="cambiarMes(1)" style="background:none;border:none;color:var(--dorado);font-size:1.1rem;cursor:pointer;padding:0 6px;">&#8250;</button>
+        </div>
+        <!-- Días de la semana -->
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:3px; padding:10px 10px 0;">
+          <div style="text-align:center;font-size:0.7rem;color:var(--dorado);font-weight:700;padding:3px 0 6px;">Lu</div><div style="text-align:center;font-size:0.7rem;color:var(--dorado);font-weight:700;padding:3px 0 6px;">Ma</div><div style="text-align:center;font-size:0.7rem;color:var(--dorado);font-weight:700;padding:3px 0 6px;">Mi</div><div style="text-align:center;font-size:0.7rem;color:var(--dorado);font-weight:700;padding:3px 0 6px;">Ju</div><div style="text-align:center;font-size:0.7rem;color:var(--dorado);font-weight:700;padding:3px 0 6px;">Vi</div><div style="text-align:center;font-size:0.7rem;color:var(--dorado);font-weight:700;padding:3px 0 6px;">Sa</div><div style="text-align:center;font-size:0.7rem;color:var(--dorado);font-weight:700;padding:3px 0 6px;">Do</div>
+        </div>
+        <!-- Días -->
+        <div id="cal-dias" style="display:grid; grid-template-columns:repeat(7,1fr); gap:3px; padding:0 10px 10px;"></div>
+        <!-- Leyenda -->
+        <div style="padding:8px 12px 6px; font-size:0.7rem; color:#333; display:flex; gap:10px; flex-wrap:wrap;">
+          <span><span style="display:inline-block;width:10px;height:10px;background:#C2185B;border-radius:50%;margin-right:4px;vertical-align:middle;"></span>Hoy</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:rgba(34,139,34,0.7);border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Grupos</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:rgba(200,16,46,0.6);border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Eliminat.</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:var(--dorado);border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Final</span>
+        </div>
+        <div id="partidos-dia" style="border-top:1px solid #D4B896;"></div>
+      </div>
+
+      <script>
+        var mesActual = 0; // 0=junio, 1=julio
+        var meses = ['JUNIO <span style="color:var(--dorado)">2026</span>', 'JULIO <span style="color:var(--dorado)">2026</span>'];
+
+        // junio: empieza lunes(0 offset), 30 días
+        // julio: empieza miércoles(2 offset), 31 días
+        var _hoy = new Date();
+        var _hoyMes = _hoy.getMonth(); // 5=junio, 6=julio
+        var _hoyDia = _hoy.getDate();
+        var calData = [
+          { offset: 0, dias: 30, grupo: [11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27], knockout: [28,29,30], hoy: (_hoyMes === 5 ? _hoyDia : null), final: [] },
+          { offset: 2, dias: 31, grupo: [], knockout: [1,2,3,4,5,6,7,9,10,11,12,14,15,18], hoy: (_hoyMes === 6 ? _hoyDia : null), final: [19] }
+        ];
+
+        // Partidos por día (hora España = hora UK + 1)
+        var partidos = {
+          '11-6':  [{l:'México',fl:'mx',h:'21:00',v:'Sudáfrica',fv:'za'}],
+          '12-6':  [{l:'Corea del Sur',fl:'kr',h:'04:00',v:'Chequia',fv:'cz'},{l:'Canadá',fl:'ca',h:'21:00',v:'Bosnia y Herz.',fv:'ba'}],
+          '13-6':  [{l:'Brasil',fl:'br',h:'00:00',v:'Marruecos',fv:'ma'},{l:'EE.UU.',fl:'us',h:'03:00',v:'Paraguay',fv:'py'},{l:'Catar',fl:'qa',h:'21:00',v:'Suiza',fv:'ch'}],
+          '14-6':  [{l:'Haití',fl:'ht',h:'03:00',v:'Escocia',fv:'gb-sct'},{l:'Australia',fl:'au',h:'06:00',v:'Turquía',fv:'tr'},{l:'Alemania',fl:'de',h:'19:00',v:'Curazao',fv:'cw'},{l:'Países Bajos',fl:'nl',h:'22:00',v:'Japón',fv:'jp'}],
+          '15-6':  [{l:'Costa de Marfil',fl:'ci',h:'01:00',v:'Ecuador',fv:'ec'},{l:'Suecia',fl:'se',h:'04:00',v:'Túnez',fv:'tn'},{l:'España',fl:'es',h:'18:00',v:'Cabo Verde',fv:'cv'},{l:'Bélgica',fl:'be',h:'21:00',v:'Egipto',fv:'eg'}],
+          '16-6':  [{l:'Arabia Saudí',fl:'sa',h:'00:00',v:'Uruguay',fv:'uy'},{l:'Irán',fl:'ir',h:'03:00',v:'Nueva Zelanda',fv:'nz'},{l:'Francia',fl:'fr',h:'21:00',v:'Senegal',fv:'sn'}],
+          '17-6':  [{l:'Irak',fl:'iq',h:'00:00',v:'Noruega',fv:'no'},{l:'Argentina',fl:'ar',h:'03:00',v:'Argelia',fv:'dz'},{l:'Austria',fl:'at',h:'06:00',v:'Jordania',fv:'jo'},{l:'Portugal',fl:'pt',h:'19:00',v:'RD Congo',fv:'cd'},{l:'Inglaterra',fl:'gb-eng',h:'22:00',v:'Croacia',fv:'hr'}],
+          '18-6':  [{l:'Rep. Checa',fl:'cz',h:'18:00',v:'Sudáfrica',fv:'za'},{l:'Ghana',fl:'gh',h:'01:00',v:'Panamá',fv:'pa'},{l:'Suiza',fl:'ch',h:'21:00',v:'Bosnia y Herz.',fv:'ba'},{l:'Canadá',fl:'ca',h:'00:00',v:'Catar',fv:'qa'},{l:'Uzbekistán',fl:'uz',h:'04:00',v:'Colombia',fv:'co'}],
+          '19-6':  [{l:'México',fl:'mx',h:'03:00',v:'Corea del Sur',fv:'kr'},{l:'Escocia',fl:'gb-sct',h:'00:00',v:'Marruecos',fv:'ma'},{l:'EE.UU.',fl:'us',h:'21:00',v:'Australia',fv:'au'}],
+          '20-6':  [{l:'Brasil',fl:'br',h:'02:30',v:'Haití',fv:'ht'},{l:'Turquía',fl:'tr',h:'05:00',v:'Paraguay',fv:'py'},{l:'Alemania',fl:'de',h:'22:00',v:'Costa de Marfil',fv:'ci'}],
+          '21-6':  [{l:'Ecuador',fl:'ec',h:'02:00',v:'Curazao',fv:'cw'},{l:'Túnez',fl:'tn',h:'06:00',v:'Japón',fv:'jp'},{l:'España',fl:'es',h:'18:00',v:'Arabia Saudí',fv:'sa'},{l:'Bélgica',fl:'be',h:'21:00',v:'Irán',fv:'ir'}],
+          '22-6':  [{l:'Uruguay',fl:'uy',h:'00:00',v:'Cabo Verde',fv:'cv'},{l:'Nueva Zelanda',fl:'nz',h:'03:00',v:'Egipto',fv:'eg'},{l:'Argentina',fl:'ar',h:'19:00',v:'Austria',fv:'at'},{l:'Francia',fl:'fr',h:'23:00',v:'Irak',fv:'iq'}],
+          '23-6':  [{l:'Noruega',fl:'no',h:'02:00',v:'Senegal',fv:'sn'},{l:'Jordania',fl:'jo',h:'05:00',v:'Argelia',fv:'dz'},{l:'Portugal',fl:'pt',h:'19:00',v:'Uzbekistán',fv:'uz'},{l:'Inglaterra',fl:'gb-eng',h:'22:00',v:'Ghana',fv:'gh'}],
+          '24-6':  [{l:'Colombia',fl:'co',h:'04:00',v:'RD Congo',fv:'cd'},{l:'Suiza',fl:'ch',h:'21:00',v:'Canadá',fv:'ca'},{l:'Bosnia y Herz.',fl:'ba',h:'21:00',v:'Catar',fv:'qa'}],
+          '25-6':  [{l:'Sudáfrica',fl:'za',h:'03:00',v:'Corea del Sur',fv:'kr'},{l:'Rep. Checa',fl:'cz',h:'03:00',v:'México',fv:'mx'},{l:'Marruecos',fl:'ma',h:'00:00',v:'Haití',fv:'ht'},{l:'Escocia',fl:'gb-sct',h:'00:00',v:'Brasil',fv:'br'},{l:'Curazao',fl:'cw',h:'22:00',v:'Costa de Marfil',fv:'ci'},{l:'Ecuador',fl:'ec',h:'22:00',v:'Alemania',fv:'de'}],
+          '26-6':  [{l:'Túnez',fl:'tn',h:'01:00',v:'Países Bajos',fv:'nl'},{l:'Japón',fl:'jp',h:'01:00',v:'Suecia',fv:'se'},{l:'Turquía',fl:'tr',h:'04:00',v:'EE.UU.',fv:'us'},{l:'Paraguay',fl:'py',h:'04:00',v:'Australia',fv:'au'},{l:'Noruega',fl:'no',h:'21:00',v:'Francia',fv:'fr'},{l:'Senegal',fl:'sn',h:'21:00',v:'Irak',fv:'iq'}],
+          '27-6':  [{l:'Cabo Verde',fl:'cv',h:'02:00',v:'Arabia Saudí',fv:'sa'},{l:'Uruguay',fl:'uy',h:'02:00',v:'España',fv:'es'},{l:'Nueva Zelanda',fl:'nz',h:'05:00',v:'Bélgica',fv:'be'},{l:'Egipto',fl:'eg',h:'05:00',v:'Irán',fv:'ir'},{l:'Panamá',fl:'pa',h:'23:00',v:'Inglaterra',fv:'gb-eng'},{l:'Croacia',fl:'hr',h:'23:00',v:'Ghana',fv:'gh'}],
+          '28-6':  [{l:'Colombia',fl:'co',h:'01:30',v:'Portugal',fv:'pt'},{l:'RD Congo',fl:'cd',h:'01:30',v:'Uzbekistán',fv:'uz'},{l:'Argelia',fl:'dz',h:'04:00',v:'Austria',fv:'at'},{l:'Jordania',fl:'jo',h:'04:00',v:'Argentina',fv:'ar'},{l:'Dieciseisavos',fl:'',h:'21:00',v:'Por determinar',fv:''}],
+          '29-6':  [{l:'Dieciseisavos',fl:'',h:'19:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'22:30',v:'Por determinar',fv:''}],
+          '30-6':  [{l:'Dieciseisavos',fl:'',h:'03:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'19:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'23:00',v:'Por determinar',fv:''}],
+          '1-7':   [{l:'Dieciseisavos',fl:'',h:'03:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'18:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'22:00',v:'Por determinar',fv:''}],
+          '2-7':   [{l:'Dieciseisavos',fl:'',h:'03:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'21:00',v:'Por determinar',fv:''}],
+          '3-7':   [{l:'Dieciseisavos',fl:'',h:'19:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'22:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'23:00',v:'Por determinar',fv:''}],
+          '4-7':   [{l:'Dieciseisavos',fl:'',h:'03:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'03:30',v:'Por determinar',fv:''},{l:'Octavos de final',fl:'',h:'19:00',v:'Por determinar',fv:''},{l:'Octavos de final',fl:'',h:'23:00',v:'Por determinar',fv:''}],
+          '5-7':   [{l:'Octavos de final',fl:'',h:'22:00',v:'Por determinar',fv:''}],
+          '6-7':   [{l:'Octavos de final',fl:'',h:'02:00',v:'Por determinar',fv:''},{l:'Octavos de final',fl:'',h:'21:00',v:'Por determinar',fv:''}],
+          '7-7':   [{l:'Octavos de final',fl:'',h:'03:00',v:'Por determinar',fv:''},{l:'Octavos de final',fl:'',h:'18:00',v:'Por determinar',fv:''},{l:'Octavos de final',fl:'',h:'22:00',v:'Por determinar',fv:''}],
+          '9-7':   [{l:'Cuartos de final',fl:'',h:'22:00',v:'Por determinar',fv:''}],
+          '10-7':  [{l:'Cuartos de final',fl:'',h:'21:00',v:'Por determinar',fv:''}],
+          '11-7':  [{l:'Cuartos de final',fl:'',h:'23:00',v:'Por determinar',fv:''}],
+          '12-7':  [{l:'Cuartos de final',fl:'',h:'03:00',v:'Por determinar',fv:''}],
+          '14-7':  [{l:'Semifinal',fl:'',h:'21:00',v:'Por determinar',fv:''}],
+          '15-7':  [{l:'Semifinal',fl:'',h:'21:00',v:'Por determinar',fv:''}],
+          '18-7':  [{l:'3er y 4º puesto',fl:'',h:'23:00',v:'Por determinar',fv:''}],
+          '19-7':  [{l:'⭐ FINAL',fl:'',h:'21:00',v:'Mundial 2026 ⭐',fv:''}]
+        };
+
+        function renderCalendario() {
+          var d = calData[mesActual];
+          document.getElementById('cal-titulo').innerHTML = meses[mesActual];
+          var mes = mesActual === 0 ? 6 : 7;
+          var html = '';
+          for (var i = 0; i < d.offset; i++) html += '<div></div>';
+          for (var n = 1; n <= d.dias; n++) {
+            var st = 'text-align:center;font-size:0.85rem;padding:16px 2px;cursor:pointer;';
+            var key = n + '-' + mes;
+            var tienePartido = partidos[key] && partidos[key].length > 0;
+            if (n === d.hoy) st += 'border-radius:50%;background:#C2185B;color:#fff;font-weight:900;';
+            else if (d.final.indexOf(n) >= 0) st += 'border-radius:4px;background:var(--dorado);color:var(--azul);font-weight:900;';
+            else if (d.knockout.indexOf(n) >= 0) st += 'border-radius:4px;background:rgba(200,16,46,0.5);color:#fff;font-weight:600;';
+            else if (d.grupo.indexOf(n) >= 0) st += 'border-radius:4px;background:rgba(34,139,34,0.6);color:#fff;font-weight:600;';
+            else st += 'border-radius:4px;color:var(--dorado);';
+            html += '<div style="' + st + '" onclick="mostrarPartidos(' + n + ',' + mes + ')">' + n + '</div>';
+          }
+          document.getElementById('cal-dias').innerHTML = html;
+          document.getElementById('partidos-dia').innerHTML = '';
+        }
+
+        var diaVisto = null, mesVisto = null;
+        function mostrarPartidos(dia, mes) {
+          diaVisto = dia; mesVisto = mes;
+          var key = dia + '-' + mes;
+          var lista = partidos[key];
+          var mesesNombres = {6:'junio',7:'julio'};
+          var contenedor = document.getElementById('partidos-dia');
+          if (!lista || lista.length === 0) {
+            var d = calData[mes === 6 ? 0 : 1];
+            if (d.final.indexOf(dia) >= 0) {
+              contenedor.innerHTML = '<div style="padding:10px;color:var(--dorado);font-size:0.82rem;font-weight:700;">🏆 Final del Mundial</div>';
+            } else if (d.knockout.indexOf(dia) >= 0) {
+              contenedor.innerHTML = '<div style="padding:10px;color:#aaa;font-size:0.82rem;">Equipos por determinar</div>';
+            } else {
+              contenedor.innerHTML = '<div style="padding:10px;color:#555;font-size:0.8rem;">No hay partidos este día.</div>';
+            }
+            return;
+          }
+          var html = '<div style="padding:8px 10px 4px;font-size:0.7rem;color:var(--dorado);font-weight:700;letter-spacing:1px;">📅 ' + dia + ' de ' + mesesNombres[mes] + '</div>';
+          lista.forEach(function(p) {
+            html += '<div style="display:grid;grid-template-columns:1fr 52px 1fr;align-items:center;padding:6px 10px;border-top:1px solid #D4B896;gap:4px;">';
+            // Local
+            html += '<div style="display:flex;align-items:center;justify-content:flex-end;gap:5px;">';
+            html += '<span style="font-size:0.8rem;font-weight:600;text-align:right;color:#000;">' + p.l + '</span>';
+            if (p.fl) html += '<img src="https://flagcdn.com/w40/' + p.fl + '.png" style="width:22px;height:15px;object-fit:cover;border-radius:2px;flex-shrink:0;">';
+            html += '</div>';
+            // Resultado o Hora
+            var cacheKey = (p.fl || '') + '-' + (p.fv || '');
+            var res = resultadosCache[cacheKey];
+            if (res) {
+              html += '<div style="font-size:0.92rem;font-weight:900;text-align:center;white-space:nowrap;color:#000;">' + res + '</div>';
+            } else {
+              html += '<div style="font-size:0.78rem;color:var(--dorado);font-weight:800;text-align:center;white-space:nowrap;">' + (p.h || 'vs') + '</div>';
+            }
+            // Visitante
+            html += '<div style="display:flex;align-items:center;gap:5px;">';
+            if (p.fv) html += '<img src="https://flagcdn.com/w40/' + p.fv + '.png" style="width:22px;height:15px;object-fit:cover;border-radius:2px;flex-shrink:0;">';
+            html += '<span style="font-size:0.8rem;font-weight:600;color:#000;">' + p.v + '</span>';
+            html += '</div>';
+            html += '</div>';
+          });
+          contenedor.innerHTML = html;
+        }
+
+        function cambiarMes(dir) {
+          mesActual = Math.max(0, Math.min(1, mesActual + dir));
+          renderCalendario();
+        }
+
+        renderCalendario();
+
+        // API-Football integration
+        var API_KEY = 'b7acf5ea67mshdecb3f1af985308p1e6575jsn683052abd6e2';
+        var FD_API_KEY = 'a3425a5622b2441aa8f49efd03afda13';
+        var matchCache = {};
+        var resultadosCache = {};
+        var ultimaAPI = 0;
+
+        // Flag code → API team name mapping
+        var apiNombres = {
+          'mx':['Mexico'],'za':['South Africa'],'kr':['South Korea','Korea Republic','Korea'],'cz':['Czech Republic','Czechia'],
+          'ca':['Canada'],'ba':['Bosnia','Bosnia and Herzegovina','Bosnia & Herzegovina'],'qa':['Qatar'],'ch':['Switzerland'],
+          'br':['Brazil'],'ma':['Morocco'],'gb-sct':['Scotland'],'ht':['Haiti'],
+          'us':['USA','United States','US'],'tr':['Turkey','Türkiye'],'py':['Paraguay'],'au':['Australia'],
+          'de':['Germany'],'ec':['Ecuador'],'cw':['Curacao','Curaçao'],'ci':['Ivory Coast','Côte d\'Ivoire','Cote d\'Ivoire'],
+          'nl':['Netherlands','Holland'],'jp':['Japan'],'se':['Sweden'],'tn':['Tunisia'],
+          'be':['Belgium'],'nz':['New Zealand'],'ir':['Iran','IR Iran'],'eg':['Egypt'],
+          'es':['Spain'],'cv':['Cape Verde'],'sa':['Saudi Arabia'],'uy':['Uruguay'],
+          'fr':['France'],'sn':['Senegal'],'iq':['Iraq'],'no':['Norway'],
+          'ar':['Argentina'],'at':['Austria'],'jo':['Jordan'],'dz':['Algeria'],
+          'pt':['Portugal'],'co':['Colombia'],'uz':['Uzbekistan'],'cd':['DR Congo','Congo DR','Democratic Republic of Congo'],
+          'gb-eng':['England'],'hr':['Croatia'],'gh':['Ghana'],'pa':['Panama']
+        };
+        function buscarFl(apiName) {
+          var nombre = apiName.toLowerCase();
+          var found = null;
+          Object.keys(apiNombres).forEach(function(fl) {
+            apiNombres[fl].forEach(function(n) {
+              if (n.toLowerCase() === nombre) found = fl;
+            });
+          });
+          if (!found) {
+            Object.keys(apiNombres).forEach(function(fl) {
+              apiNombres[fl].forEach(function(n) {
+                if (nombre.indexOf(n.toLowerCase()) >= 0 || n.toLowerCase().indexOf(nombre) >= 0) found = fl;
+              });
+            });
+          }
+          return found;
+        }
+
+        function mostrarEnJuego(enJuego) {
+          var html = '';
+          enJuego.forEach(function(item) {
+            var p = item.partido;
+            var cacheKey = p.fl + '-' + p.fv;
+            var cache = matchCache[cacheKey];
+            var marcador = cache ? (cache.hg + ' - ' + cache.ag) : '- -';
+            var minStr = cache && cache.elapsed ? cache.elapsed + "'" : (item.min <= 45 ? item.min + "'" : item.min <= 90 ? item.min + "'" : "90+'");
+            html += '<div class="partido-directo">';
+            html += '<div class="pd-pais">';
+            if (p.fl) html += '<img src="https://flagcdn.com/w40/' + p.fl + '.png">';
+            html += p.l + '</div>';
+            html += '<div class="pd-marcador">' + marcador + '</div>';
+            html += '<div class="pd-pais">' + p.v;
+            if (p.fv) html += '<img src="https://flagcdn.com/w40/' + p.fv + '.png">';
+            html += '</div>';
+            html += '<div class="pd-min">' + minStr + '</div>';
+            html += '</div>';
+          });
+          document.getElementById('partidos-vivo').innerHTML = html;
+        }
+
+        function actualizarDesdeAPI(enJuego) {
+          fetch('https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/scoreboard')
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.events) {
+              data.events.forEach(function(event) {
+                var comp = event.competitions && event.competitions[0];
+                if (!comp) return;
+                var statusName = comp.status && comp.status.type && comp.status.type.name;
+                if (statusName === 'STATUS_FINAL') {
+                  var h2 = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'home'; });
+                  var a2 = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'away'; });
+                  if (h2 && a2) {
+                    var fh2 = buscarFl(h2.team.displayName), fa2 = buscarFl(a2.team.displayName);
+                    if (fh2 && fa2) {
+                      resultadosCache[fh2 + '-' + fa2] = parseInt(h2.score) + '-' + parseInt(a2.score);
+                      resultadosCache[fa2 + '-' + fh2] = parseInt(a2.score) + '-' + parseInt(h2.score);
+                      if (diaVisto !== null) mostrarPartidos(diaVisto, mesVisto);
+                    }
+                  }
+                  return;
+                }
+                if (statusName !== 'STATUS_IN_PROGRESS' && statusName !== 'STATUS_HALFTIME') return;
+                var home = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'home'; });
+                var away = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'away'; });
+                if (!home || !away) return;
+                var flHome = buscarFl(home.team.displayName);
+                var flAway = buscarFl(away.team.displayName);
+                if (flHome && flAway) {
+                  matchCache[flHome + '-' + flAway] = {
+                    hg: parseInt(home.score) || 0,
+                    ag: parseInt(away.score) || 0,
+                    elapsed: (comp.status && comp.status.displayClock) || null
+                  };
+                }
+              });
+            }
+            mostrarEnJuego(enJuego);
+          })
+          .catch(function() { mostrarEnJuego(enJuego); });
+        }
+
+        function procesarResultadosData(data) {
+          if (!data.events) return;
+          var huboNuevos = false;
+          data.events.forEach(function(event) {
+            var comp = event.competitions && event.competitions[0];
+            if (!comp) return;
+            var statusName = comp.status && comp.status.type && comp.status.type.name;
+            if (statusName !== 'STATUS_FINAL') return;
+            var home = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'home'; });
+            var away = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'away'; });
+            if (!home || !away) return;
+            var flHome = buscarFl(home.team.displayName);
+            var flAway = buscarFl(away.team.displayName);
+            if (flHome && flAway) {
+              resultadosCache[flHome + '-' + flAway] = parseInt(home.score) + '-' + parseInt(away.score);
+              resultadosCache[flAway + '-' + flHome] = parseInt(away.score) + '-' + parseInt(home.score);
+              huboNuevos = true;
+            }
+          });
+          if (huboNuevos && diaVisto !== null) mostrarPartidos(diaVisto, mesVisto);
+        }
+
+        function cargarResultados() {
+          var hoy = new Date();
+          for (var i = 0; i <= 32; i++) {
+            var d = new Date(2026, 5, 11 + i);
+            if (d > hoy) break;
+            (function(fecha) {
+              fetch('https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/scoreboard?dates=' + fecha + '&limit=50')
+              .then(function(r) { return r.json(); })
+              .then(procesarResultadosData)
+              .catch(function() {});
+            })('' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0'));
+          }
+        }
+
+        function comprobarEnDirecto() {
+          var ahora = new Date();
+          var utc = ahora.getTime() + ahora.getTimezoneOffset() * 60000;
+          var españa = new Date(utc + 2 * 3600000);
+          var diaActual = españa.getDate();
+          var mesActualNum = españa.getMonth() + 1;
+          var minActual = españa.getHours() * 60 + españa.getMinutes();
+
+          var key = diaActual + '-' + mesActualNum;
+          var lista = partidos[key] || [];
+          var enJuego = [];
+
+          lista.forEach(function(p) {
+            if (!p.h || p.h === '') return;
+            var partes = p.h.split(':');
+            var minInicio = parseInt(partes[0]) * 60 + parseInt(partes[1]);
+            var minFin = minInicio + 140;
+            if (minActual >= minInicio && minActual <= minFin) {
+              enJuego.push({ partido: p, min: minActual - minInicio });
+            }
+          });
+
+          var hayJuego = enJuego.length > 0;
+          document.getElementById('badge-directo').style.display = hayJuego ? 'inline-flex' : 'none';
+          document.getElementById('barra-directo').style.display = hayJuego ? 'block' : 'none';
+
+          var ahora_ts = Date.now();
+          if (hayJuego) {
+            if (ahora_ts - ultimaAPI > 120000) {
+              ultimaAPI = ahora_ts;
+              actualizarDesdeAPI(enJuego);
+            } else {
+              mostrarEnJuego(enJuego);
+            }
+          } else if (ahora_ts - ultimaAPI > 120000) {
+            ultimaAPI = ahora_ts;
+            actualizarDesdeAPI([]);
+          }
+        }
+
+        comprobarEnDirecto();
+        setInterval(comprobarEnDirecto, 60000);
+
+        // ===== DATOS DE GRUPOS =====
+        var gruposData = {
+          'A': [{n:'México',fl:'mx',api:'Mexico'},{n:'Sudáfrica',fl:'za',api:'South Africa'},{n:'Corea del Sur',fl:'kr',api:'South Korea'},{n:'Chequia',fl:'cz',api:'Czech Republic'}],
+          'B': [{n:'Canadá',fl:'ca',api:'Canada'},{n:'Bosnia y Herz.',fl:'ba',api:'Bosnia and Herzegovina'},{n:'Catar',fl:'qa',api:'Qatar'},{n:'Suiza',fl:'ch',api:'Switzerland'}],
+          'C': [{n:'Brasil',fl:'br',api:'Brazil'},{n:'Marruecos',fl:'ma',api:'Morocco'},{n:'Escocia',fl:'gb-sct',api:'Scotland'},{n:'Haití',fl:'ht',api:'Haiti'}],
+          'D': [{n:'EE.UU.',fl:'us',api:'United States'},{n:'Turquía',fl:'tr',api:'Turkey'},{n:'Paraguay',fl:'py',api:'Paraguay'},{n:'Australia',fl:'au',api:'Australia'}],
+          'E': [{n:'Alemania',fl:'de',api:'Germany'},{n:'Ecuador',fl:'ec',api:'Ecuador'},{n:'Curazao',fl:'cw',api:'Curacao'},{n:'Costa de Marfil',fl:'ci',api:'Ivory Coast'}],
+          'F': [{n:'Países Bajos',fl:'nl',api:'Netherlands'},{n:'Japón',fl:'jp',api:'Japan'},{n:'Suecia',fl:'se',api:'Sweden'},{n:'Túnez',fl:'tn',api:'Tunisia'}],
+          'G': [{n:'Bélgica',fl:'be',api:'Belgium'},{n:'Nueva Zelanda',fl:'nz',api:'New Zealand'},{n:'Irán',fl:'ir',api:'Iran'},{n:'Egipto',fl:'eg',api:'Egypt'}],
+          'H': [{n:'España',fl:'es',api:'Spain'},{n:'Cabo Verde',fl:'cv',api:'Cape Verde'},{n:'Arabia Saudí',fl:'sa',api:'Saudi Arabia'},{n:'Uruguay',fl:'uy',api:'Uruguay'}],
+          'I': [{n:'Francia',fl:'fr',api:'France'},{n:'Senegal',fl:'sn',api:'Senegal'},{n:'Irak',fl:'iq',api:'Iraq'},{n:'Noruega',fl:'no',api:'Norway'}],
+          'J': [{n:'Argentina',fl:'ar',api:'Argentina'},{n:'Austria',fl:'at',api:'Austria'},{n:'Jordania',fl:'jo',api:'Jordan'},{n:'Argelia',fl:'dz',api:'Algeria'}],
+          'K': [{n:'Portugal',fl:'pt',api:'Portugal'},{n:'Colombia',fl:'co',api:'Colombia'},{n:'Uzbekistán',fl:'uz',api:'Uzbekistan'},{n:'RD Congo',fl:'cd',api:'DR Congo'}],
+          'L': [{n:'Inglaterra',fl:'gb-eng',api:'England'},{n:'Croacia',fl:'hr',api:'Croatia'},{n:'Ghana',fl:'gh',api:'Ghana'},{n:'Panamá',fl:'pa',api:'Panama'}]
+        };
+
+        // ===== QUINIELA =====
+        var quinielaData = {
+          'Iñigo':   ['co','ci','sa','au','za','cz','es','be'],
+          'Inna':    ['ma','iq','cd','ch','cv','gb-sct','fr','ca'],
+          'Ainhara': ['tr','pa','no','sn','kr','gh','us','pt'],
+          'Tere':    ['se','uz','jo','ec','ht','qa','gb-eng','ar'],
+          'Nacho':   ['eg','cw','py','at','hr','jp','mx','nl'],
+          'Miguel':  ['ba','dz','ir','uy','tn','nz','br','de']
+        };
+
+        var coloresQuiniela = {
+          'Iñigo':   {hex:'#FF6D00', rgba:'rgba(255,109,0,0.22)'},
+          'Inna':    {hex:'#FF80AB', rgba:'rgba(255,128,171,0.25)'},
+          'Ainhara': {hex:'#1E88E5', rgba:'rgba(30,136,229,0.18)'},
+          'Tere':    {hex:'#4527A0', rgba:'rgba(69,39,160,0.22)'},
+          'Nacho':   {hex:'#43A047', rgba:'rgba(67,160,71,0.18)'},
+          'Miguel':  {hex:'#FDD835', rgba:'rgba(253,216,53,0.25)'}
+        };
+
+        var colorPorEquipo = {};
+        Object.keys(quinielaData).forEach(function(nombre) {
+          quinielaData[nombre].forEach(function(fl) {
+            colorPorEquipo[fl] = coloresQuiniela[nombre];
+          });
+        });
+
+        // Puntos por victorias en eliminatorias (fl -> pts acumulados)
+        var puntosKnockout = {};
+
+        var standingsAPI = {};
+        var paisesEliminados = {};
+
+        // ===== RENDER TARJETA GRUPO =====
+        function renderGrupoCard(letra) {
+          var el = document.getElementById('grupo-' + letra);
+          if (!el) return;
+          var data = (standingsAPI[letra] || []).slice().sort(function(a, b) {
+            if (b.pts !== a.pts) return b.pts - a.pts;
+            if (b.gd !== a.gd) return b.gd - a.gd;
+            return b.gf - a.gf;
+          });
+          if (!data || !data.length) return;
+          var grupoCompleto = data.every(function(t) { return t.mp >= 3; });
+          var gruposTerminados = Object.keys(standingsAPI).filter(function(l) {
+            return standingsAPI[l] && standingsAPI[l].every(function(t) { return t.mp >= 3; });
+          }).length;
+          var faseGruposActiva = new Date() < new Date(2026, 5, 28);
+          var html = (faseGruposActiva ? '<div class="grupo-titulo">GRUPO ' + letra + '</div>' : '') + '<div style="padding:4px 0;">';
+          html += '<div style="display:grid;grid-template-columns:14px 1fr 24px 28px 28px;gap:2px;padding:2px 10px 4px;border-bottom:1px solid #D4B896;">';
+          html += '<div></div><div></div>';
+          html += '<div style="text-align:center;font-size:0.62rem;color:var(--dorado);font-weight:700;">PJ</div>';
+          html += '<div style="text-align:center;font-size:0.62rem;color:var(--dorado);font-weight:700;">DG</div>';
+          html += '<div style="text-align:center;font-size:0.62rem;color:var(--dorado);font-weight:700;">Pts</div>';
+          html += '</div>';
+          // Clasificado matemáticamente: sus pts > máximo alcanzable por el siguiente
+          var confirmado = [false, false, false, false];
+          if (grupoCompleto) {
+            confirmado[0] = confirmado[1] = true;
+          } else if (data[0].mp > 0) {
+            for (var ci = 0; ci < 2 && ci < data.length; ci++) {
+              var rival = data[ci + 1];
+              if (!rival) { confirmado[ci] = true; continue; }
+              var maxRival = rival.pts + Math.max(0, 3 - rival.mp) * 3;
+              confirmado[ci] = data[ci].pts > maxRival;
+            }
+          }
+          data.forEach(function(team, idx) {
+            var elim = paisesEliminados[team.fl];
+            var colorTeam = colorPorEquipo[team.fl];
+            var rowStyle = elim ? 'opacity:0.38;' : (confirmado[idx] ? 'background:rgba(34,139,34,0.28);' : '');
+            if (colorTeam && !elim) rowStyle += 'background:' + colorTeam.rgba + ';border-left:4px solid ' + colorTeam.hex + ';';
+            var gdStr = team.gd > 0 ? '+' + team.gd : '' + team.gd;
+            var gdCol = team.gd > 0 ? '#5cb85c' : team.gd < 0 ? '#d9534f' : '#888';
+            html += '<div style="display:grid;grid-template-columns:14px 1fr 24px 28px 28px;gap:2px;align-items:center;padding:5px 10px;border-bottom:1px solid #D4B896;' + rowStyle + '">';
+            html += '<div style="font-size:0.65rem;color:#666;text-align:center;">' + (idx+1) + '</div>';
+            html += '<div style="display:flex;align-items:center;gap:5px;min-width:0;">';
+            html += '<img src="https://flagcdn.com/w40/' + team.fl + '.png" style="width:22px;height:15px;object-fit:cover;border-radius:2px;border:1px solid #444;flex-shrink:0;">';
+            html += '<span style="font-size:0.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#000;">' + team.n + '</span>';
+            if (elim) html += ' <span style="font-size:0.65rem;color:var(--rojo);flex-shrink:0;">✕</span>';
+            html += '</div>';
+            html += '<div style="font-size:0.73rem;text-align:center;color:#888;">' + team.mp + '</div>';
+            html += '<div style="font-size:0.73rem;text-align:center;color:' + gdCol + ';">' + gdStr + '</div>';
+            html += '<div style="font-size:0.85rem;font-weight:800;text-align:center;color:var(--dorado);">' + team.pts + '</div>';
+            html += '</div>';
+          });
+          html += '</div>';
+          el.innerHTML = html;
+        }
+
+        // ===== PUNTOS REALES DE CADA EQUIPO EN QUINIELA =====
+        function actualizarPuntosQuiniela() {
+          var ptsEquipo = {};
+          Object.keys(standingsAPI).forEach(function(letra) {
+            standingsAPI[letra].forEach(function(team) {
+              if (team.fl) ptsEquipo[team.fl] = team.pts;
+            });
+          });
+          document.querySelectorAll('[data-fl]').forEach(function(li) {
+            var fl = li.getAttribute('data-fl');
+            var pts = ptsEquipo[fl] !== undefined ? ptsEquipo[fl] : 0;
+            var badge = li.querySelector('.pts-real');
+            if (!badge) {
+              badge = document.createElement('span');
+              badge.className = 'pts-real';
+              badge.style.cssText = 'margin-left:auto;font-size:0.7rem;font-weight:700;color:var(--dorado);background:rgba(212,160,23,0.13);padding:1px 6px;border-radius:3px;flex-shrink:0;';
+              li.appendChild(badge);
+            }
+            badge.textContent = pts + 'p';
+          });
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+          if (new Date() >= new Date(2026, 5, 28)) {
+            document.querySelectorAll('.grupo-titulo').forEach(function(el) { el.style.display = 'none'; });
+          }
+          actualizarPuntosQuiniela();
+          renderRankingQuiniela();
+        });
+
+        // ===== ACTUALIZAR ELIMINADOS EN QUINIELA =====
+        function actualizarEliminadosEnPagina() {
+          document.querySelectorAll('[data-fl]').forEach(function(li) {
+            var fl = li.getAttribute('data-fl');
+            li.style.opacity = paisesEliminados[fl] ? '0.35' : '';
+          });
+        }
+
+        // ===== CALCULAR PUNTOS QUINIELA =====
+        function calcularPuntosQuiniela() {
+          var puntos = {};
+          Object.keys(quinielaData).forEach(function(n) { puntos[n] = 0; });
+
+          // Fase de grupos (victorias y empates)
+          Object.keys(standingsAPI).forEach(function(letra) {
+            standingsAPI[letra].forEach(function(team) {
+              if (!team.fl) return;
+              Object.keys(quinielaData).forEach(function(nombre) {
+                if (quinielaData[nombre].indexOf(team.fl) >= 0) {
+                  puntos[nombre] += (team.w || 0) * 3 + (team.d || 0) * 1;
+                }
+              });
+            });
+          });
+
+          // Puntos eliminatoria (victoria 16avos:4, octavos:5, cuartos:6, semis:8, final:10)
+          Object.keys(puntosKnockout).forEach(function(fl) {
+            Object.keys(quinielaData).forEach(function(nombre) {
+              if (quinielaData[nombre].indexOf(fl) >= 0) {
+                puntos[nombre] += puntosKnockout[fl];
+              }
+            });
+          });
+
+          return puntos;
+        }
+
+        // ===== RENDER RANKING QUINIELA =====
+        function renderRankingQuiniela() {
+          var el = document.getElementById('ranking-quiniela');
+          if (!el) return;
+          var puntos = calcularPuntosQuiniela();
+          var ranking = Object.keys(puntos).sort(function(a, b) { return puntos[b] - puntos[a]; });
+          var html = '<div style="background:#D4B896;color:#fff;font-weight:800;font-size:0.85rem;letter-spacing:2px;padding:10px 14px;border-bottom:2px solid var(--dorado);">CLASIFICACIÓN</div>';
+          html += '<div style="padding:4px 0;">';
+          ranking.forEach(function(nombre, idx) {
+            var pts = puntos[nombre];
+            var bg = idx === 0 && pts > 0 ? 'background:rgba(212,160,23,0.08);' : '';
+            var numCol = idx === 0 ? 'var(--dorado)' : idx === 1 ? '#bbb' : idx === 2 ? '#cd7f32' : '#555';
+            html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid #D4B896;' + bg + '">';
+            html += '<div style="display:flex;align-items:center;gap:10px;">';
+            html += '<span style="font-size:1rem;font-weight:900;color:' + numCol + ';min-width:18px;">' + (idx+1) + '</span>';
+            html += '<span style="font-size:0.95rem;font-weight:700;color:#000;">' + nombre + '</span>';
+            html += '</div>';
+            html += '<span style="font-size:1.1rem;font-weight:900;color:var(--dorado);">' + pts + '<span style="font-size:0.68rem;color:#666;margin-left:3px;">pts</span></span>';
+            html += '</div>';
+          });
+          html += '</div>';
+          html += '<div style="padding:8px 12px 10px;border-top:1px solid #D4B896;font-size:0.67rem;color:#555;line-height:1.9;">';
+          html += 'Victoria grupos: 3pts &bull; Empate: 1pt<br>';
+          html += '16avos: 4pts &bull; Octavos: 5pts<br>';
+          html += 'Cuartos: 6pts &bull; Semis: 8pts &bull; Final: 10pts';
+          html += '</div>';
+          el.innerHTML = html;
+        }
+
+        // ===== CARGA CLASIFICACIONES DESDE API =====
+        function actualizarEliminados() {
+          paisesEliminados = {};
+          var cuartos = [], terceros = [], gruposCompletos = 0;
+          Object.keys(standingsAPI).forEach(function(letra) {
+            var data = standingsAPI[letra];
+            if (!data || data.length < 4) return;
+            if (data.every(function(t) { return t.mp >= 3; })) {
+              gruposCompletos++;
+              if (data[3].fl) cuartos.push(data[3]);
+              if (data[2].fl) terceros.push(data[2]);
+            }
+          });
+          // Solo marcar eliminados cuando TODOS los 12 grupos han terminado
+          if (gruposCompletos === 12) {
+            cuartos.forEach(function(t) { paisesEliminados[t.fl] = true; });
+            terceros.sort(function(a, b) {
+              if (b.pts !== a.pts) return b.pts - a.pts;
+              if (b.gd !== a.gd) return b.gd - a.gd;
+              return b.gf - a.gf;
+            });
+            for (var i = 8; i < 12; i++) {
+              if (terceros[i] && terceros[i].fl) paisesEliminados[terceros[i].fl] = true;
+            }
+          }
+        }
+
+        function cargarClasificaciones() {
+          fetch('https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings')
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (!data.children) return;
+            data.children.forEach(function(group) {
+              var letra = (group.abbreviation || group.name || '').replace(/Group /i,'').trim();
+              if (!letra || letra.length > 1) return;
+              if (!group.standings || !group.standings.entries) return;
+              standingsAPI[letra] = group.standings.entries.map(function(entry) {
+                var apiName = entry.team.displayName || entry.team.location || '';
+                var fl = buscarFl(apiName);
+                var matched = null;
+                if (gruposData[letra]) {
+                  // exact match first
+                  gruposData[letra].forEach(function(eq) {
+                    if (!matched && eq.api.toLowerCase() === apiName.toLowerCase()) matched = eq;
+                  });
+                  // if no exact match, match by flag code from buscarFl
+                  if (!matched && fl) {
+                    gruposData[letra].forEach(function(eq) {
+                      if (!matched && eq.fl === fl) matched = eq;
+                    });
+                  }
+                }
+                if (!fl && matched) fl = matched.fl;
+                var stats = {};
+                (entry.stats || []).forEach(function(s) { stats[s.name] = s.value || 0; });
+                return {
+                  n: matched ? matched.n : apiName,
+                  fl: fl || (matched ? matched.fl : ''),
+                  pts: stats.points || 0, mp: stats.gamesPlayed || 0,
+                  w: stats.wins || 0, d: stats.ties || 0,
+                  gf: stats.pointsFor || 0, ga: stats.pointsAgainst || 0,
+                  gd: stats.pointDifferential || 0
+                };
+              });
+              renderGrupoCard(letra);
+            });
+            actualizarEliminados();
+            actualizarEliminadosEnPagina();
+            actualizarPuntosQuiniela();
+            renderRankingQuiniela();
+            inferirResultadosDeClasificacion();
+          })
+          .catch(function() {});
+        }
+
+        function inferirResultadosDeClasificacion() {
+          var ahora = new Date();
+          Object.keys(partidos).forEach(function(key) {
+            var partes = key.split('-');
+            var dia = parseInt(partes[0]);
+            var mes = parseInt(partes[1]);
+            partidos[key].forEach(function(p) {
+              if (!p.fl || !p.fv || !p.h) return;
+              var tp = p.h.split(':');
+              var finPartido = new Date(2026, mes - 1, dia, parseInt(tp[0]) + 2, parseInt(tp[1]) + 20);
+              if (finPartido >= ahora) return;
+              var cacheKey = p.fl + '-' + p.fv;
+              if (resultadosCache[cacheKey]) return;
+              var homeTeam = null, awayTeam = null;
+              Object.keys(standingsAPI).forEach(function(letra) {
+                (standingsAPI[letra] || []).forEach(function(team) {
+                  if (team.fl === p.fl) homeTeam = team;
+                  if (team.fl === p.fv) awayTeam = team;
+                });
+              });
+              if (homeTeam && awayTeam && homeTeam.mp > 0 && awayTeam.mp > 0) {
+                resultadosCache[p.fl + '-' + p.fv] = homeTeam.gf + '-' + homeTeam.ga;
+                resultadosCache[p.fv + '-' + p.fl] = awayTeam.gf + '-' + awayTeam.ga;
+              }
+            });
+          });
+          if (diaVisto !== null) mostrarPartidos(diaVisto, mesVisto);
+        }
+
+        cargarClasificaciones();
+        cargarResultados();
+        setInterval(cargarClasificaciones, 900000);
+
+      </script>
+      </div><!-- fin flex -->
+    </section>
+
+
+    <section id="quiniela" class="seccion" style="max-width:none;">
+      <h2>Quiniela</h2>
+      <div style="display:flex; gap:20px; align-items:flex-start;">
+      <div class="quiniela-grid" style="flex-shrink:0; width:min(840px, calc(100vw - 40px));">
+
+        <div class="quiniela-card" id="qcard-inigo">
+          <div class="quiniela-nombre" style="background:#FF6D00;">Iñigo</div>
+          <ul>
+            <li data-fl="co"><img src="https://flagcdn.com/w40/co.png" alt="Colombia"> Colombia</li>
+            <li data-fl="ci"><img src="https://flagcdn.com/w40/ci.png" alt="Costa de Marfil"> Costa de Marfil</li>
+            <li data-fl="sa"><img src="https://flagcdn.com/w40/sa.png" alt="Arabia Saudí"> Arabia Saudí</li>
+            <li data-fl="au"><img src="https://flagcdn.com/w40/au.png" alt="Australia"> Australia</li>
+            <li data-fl="za"><img src="https://flagcdn.com/w40/za.png" alt="Sudáfrica"> Sudáfrica</li>
+            <li data-fl="cz"><img src="https://flagcdn.com/w40/cz.png" alt="Chequia"> Rep. Checa</li>
+            <li data-fl="es"><img src="https://flagcdn.com/w40/es.png" alt="España"> España</li>
+            <li data-fl="be"><img src="https://flagcdn.com/w40/be.png" alt="Bélgica"> Bélgica</li>
+          </ul>
+        </div>
+
+        <div class="quiniela-card" id="qcard-inna">
+          <div class="quiniela-nombre" style="background:#FF80AB;color:#000;">Inna</div>
+          <ul>
+            <li data-fl="ma"><img src="https://flagcdn.com/w40/ma.png" alt="Marruecos"> Marruecos</li>
+            <li data-fl="iq"><img src="https://flagcdn.com/w40/iq.png" alt="Irak"> Irak</li>
+            <li data-fl="cd"><img src="https://flagcdn.com/w40/cd.png" alt="RD Congo"> R.D. Congo</li>
+            <li data-fl="ch"><img src="https://flagcdn.com/w40/ch.png" alt="Suiza"> Suiza</li>
+            <li data-fl="cv"><img src="https://flagcdn.com/w40/cv.png" alt="Cabo Verde"> Cabo Verde</li>
+            <li data-fl="gb-sct"><img src="https://flagcdn.com/w40/gb-sct.png" alt="Escocia"> Escocia</li>
+            <li data-fl="fr"><img src="https://flagcdn.com/w40/fr.png" alt="Francia"> Francia</li>
+            <li data-fl="ca"><img src="https://flagcdn.com/w40/ca.png" alt="Canadá"> Canadá</li>
+          </ul>
+        </div>
+
+        <div class="quiniela-card" id="qcard-ainhara">
+          <div class="quiniela-nombre" style="background:#1E88E5;">Ainhara</div>
+          <ul>
+            <li data-fl="tr"><img src="https://flagcdn.com/w40/tr.png" alt="Turquía"> Turquía</li>
+            <li data-fl="pa"><img src="https://flagcdn.com/w40/pa.png" alt="Panamá"> Panamá</li>
+            <li data-fl="no"><img src="https://flagcdn.com/w40/no.png" alt="Noruega"> Noruega</li>
+            <li data-fl="sn"><img src="https://flagcdn.com/w40/sn.png" alt="Senegal"> Senegal</li>
+            <li data-fl="kr"><img src="https://flagcdn.com/w40/kr.png" alt="Corea del Sur"> Corea del Sur</li>
+            <li data-fl="gh"><img src="https://flagcdn.com/w40/gh.png" alt="Ghana"> Ghana</li>
+            <li data-fl="us"><img src="https://flagcdn.com/w40/us.png" alt="EE.UU."> EE.UU.</li>
+            <li data-fl="pt"><img src="https://flagcdn.com/w40/pt.png" alt="Portugal"> Portugal</li>
+          </ul>
+        </div>
+
+        <div class="quiniela-card" id="qcard-tere">
+          <div class="quiniela-nombre" style="background:#4527A0;">Tere</div>
+          <ul>
+            <li data-fl="se"><img src="https://flagcdn.com/w40/se.png" alt="Suecia"> Suecia</li>
+            <li data-fl="uz"><img src="https://flagcdn.com/w40/uz.png" alt="Uzbekistán"> Uzbekistán</li>
+            <li data-fl="jo"><img src="https://flagcdn.com/w40/jo.png" alt="Jordania"> Jordania</li>
+            <li data-fl="ec"><img src="https://flagcdn.com/w40/ec.png" alt="Ecuador"> Ecuador</li>
+            <li data-fl="ht"><img src="https://flagcdn.com/w40/ht.png" alt="Haití"> Haití</li>
+            <li data-fl="qa"><img src="https://flagcdn.com/w40/qa.png" alt="Catar"> Catar</li>
+            <li data-fl="gb-eng"><img src="https://flagcdn.com/w40/gb-eng.png" alt="Inglaterra"> Inglaterra</li>
+            <li data-fl="ar"><img src="https://flagcdn.com/w40/ar.png" alt="Argentina"> Argentina</li>
+          </ul>
+        </div>
+
+        <div class="quiniela-card" id="qcard-nacho">
+          <div class="quiniela-nombre" style="background:#43A047;">Nacho</div>
+          <ul>
+            <li data-fl="eg"><img src="https://flagcdn.com/w40/eg.png" alt="Egipto"> Egipto</li>
+            <li data-fl="cw"><img src="https://flagcdn.com/w40/cw.png" alt="Curazao"> Curazao</li>
+            <li data-fl="py"><img src="https://flagcdn.com/w40/py.png" alt="Paraguay"> Paraguay</li>
+            <li data-fl="at"><img src="https://flagcdn.com/w40/at.png" alt="Austria"> Austria</li>
+            <li data-fl="hr"><img src="https://flagcdn.com/w40/hr.png" alt="Croacia"> Croacia</li>
+            <li data-fl="jp"><img src="https://flagcdn.com/w40/jp.png" alt="Japón"> Japón</li>
+            <li data-fl="mx"><img src="https://flagcdn.com/w40/mx.png" alt="México"> México</li>
+            <li data-fl="nl"><img src="https://flagcdn.com/w40/nl.png" alt="Países Bajos"> Países Bajos</li>
+          </ul>
+        </div>
+
+        <div class="quiniela-card" id="qcard-miguel">
+          <div class="quiniela-nombre" style="background:#FDD835;color:#000;">Miguel</div>
+          <ul>
+            <li data-fl="ba"><img src="https://flagcdn.com/w40/ba.png" alt="Bosnia"> Bosnia y Herzegovina</li>
+            <li data-fl="dz"><img src="https://flagcdn.com/w40/dz.png" alt="Argelia"> Argelia</li>
+            <li data-fl="ir"><img src="https://flagcdn.com/w40/ir.png" alt="Irán"> Irán</li>
+            <li data-fl="uy"><img src="https://flagcdn.com/w40/uy.png" alt="Uruguay"> Uruguay</li>
+            <li data-fl="tn"><img src="https://flagcdn.com/w40/tn.png" alt="Túnez"> Túnez</li>
+            <li data-fl="nz"><img src="https://flagcdn.com/w40/nz.png" alt="Nueva Zelanda"> Nueva Zelanda</li>
+            <li data-fl="br"><img src="https://flagcdn.com/w40/br.png" alt="Brasil"> Brasil</li>
+            <li data-fl="de"><img src="https://flagcdn.com/w40/de.png" alt="Alemania"> Alemania</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- RANKING QUINIELA -->
+      <div id="ranking-quiniela" style="flex:1; min-width:200px; background:#FDE8F0; border:1px solid #D4B896; border-radius:10px; overflow:hidden;">
+        <div style="background:#D4B896;color:#fff;font-weight:800;font-size:0.85rem;letter-spacing:2px;padding:10px 14px;border-bottom:2px solid var(--dorado);">CLASIFICACIÓN</div>
+        <div style="padding:14px;color:#555;font-size:0.8rem;">Esperando resultados...</div>
+      </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    Mundial 2026 &mdash; Uso privado &bull; <span>Hora España (CET/CEST)</span>
+  </footer>
+
+</body>
+</html>
