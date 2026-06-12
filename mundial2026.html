@@ -481,7 +481,6 @@
   <main>
 
     <section id="grupos" class="seccion" style="max-width:none;">
-      <h2>Fase de Grupos</h2>
       <div style="display:flex; gap:20px; align-items:flex-start;">
       <div id="panel-grupos" class="grupos-grid" style="flex-shrink:0; width:min(1060px, calc(100vw - 40px));">
 
@@ -1059,7 +1058,7 @@
             if (!badge) {
               badge = document.createElement('span');
               badge.className = 'pts-real';
-              badge.style.cssText = 'margin-left:auto;font-size:0.7rem;font-weight:700;color:var(--dorado);background:rgba(212,160,23,0.13);padding:1px 6px;border-radius:3px;flex-shrink:0;';
+              badge.style.cssText = 'margin-left:auto;font-size:0.7rem;font-weight:700;color:#000;background:rgba(0,0,0,0.08);padding:1px 6px;border-radius:3px;flex-shrink:0;';
               li.appendChild(badge);
             }
             badge.textContent = pts + 'p';
@@ -1147,7 +1146,10 @@
             var cab = card.querySelector('.quiniela-nombre');
             if (!cab) return;
             var pts = puntos[nombre] || 0;
-            cab.innerHTML = nombre + ' <span style="font-size:0.75rem;font-weight:600;opacity:0.85;">(' + pts + ' pts)</span>';
+            cab.style.display = 'flex';
+            cab.style.justifyContent = 'space-between';
+            cab.style.alignItems = 'center';
+            cab.innerHTML = '<span>' + nombre + '</span><span style="font-size:0.75rem;font-weight:600;opacity:0.85;">' + pts + ' pts</span>';
           });
         }
 
