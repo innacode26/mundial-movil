@@ -1003,7 +1003,7 @@
             return standingsAPI[l] && standingsAPI[l].every(function(t) { return t.mp >= 3; });
           }).length;
           var faseGruposActiva = new Date() < new Date(2026, 5, 28);
-          var html = (faseGruposActiva ? '<div class="grupo-titulo">GRUPO ' + letra + '</div>' : '') + '<div style="padding:4px 0;">';
+          var html = (faseGruposActiva ? '<div class="grupo-titulo">GRUPO ' + letra + '</div>' : '') + '<div>';
           html += '<div style="display:grid;grid-template-columns:14px 1fr 24px 28px 28px;gap:2px;padding:2px 10px 4px;background:#D4B896;border-bottom:1px solid #B89A7A;">';
           html += '<div></div><div></div>';
           html += '<div style="text-align:center;font-size:0.62rem;color:#000;font-weight:700;">PJ</div>';
