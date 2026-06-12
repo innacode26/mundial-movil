@@ -284,12 +284,11 @@
 
     .grupo-card .grupo-titulo {
       background: #D4B896;
-      color: #fff;
+      color: #000;
       font-weight: 800;
       font-size: 0.95rem;
       letter-spacing: 2px;
       padding: 8px 14px;
-      border-bottom: 2px solid #B89A7A;
     }
 
     .grupo-card ul {
@@ -1129,7 +1128,7 @@
             html += '<span style="font-size:1rem;font-weight:900;color:' + numCol + ';min-width:18px;">' + (idx+1) + '</span>';
             html += '<span style="font-size:0.95rem;font-weight:700;color:#000;">' + nombre + '</span>';
             html += '</div>';
-            html += '<span style="font-size:1.1rem;font-weight:900;color:var(--dorado);">' + pts + '<span style="font-size:0.68rem;color:#666;margin-left:3px;">pts</span></span>';
+            html += '<span style="font-size:1.1rem;font-weight:900;color:#000;">' + pts + '<span style="font-size:0.68rem;color:#666;margin-left:3px;">pts</span></span>';
             html += '</div>';
           });
           html += '</div>';
@@ -1139,6 +1138,17 @@
           html += 'Cuartos: 6pts &bull; Semis: 8pts &bull; Final: 10pts';
           html += '</div>';
           el.innerHTML = html;
+
+          // Actualizar puntos en cabeceras de tarjetas quiniela
+          var ids = {'Iñigo':'inigo','Inna':'inna','Ainhara':'ainhara','Tere':'tere','Nacho':'nacho','Miguel':'miguel'};
+          Object.keys(ids).forEach(function(nombre) {
+            var card = document.getElementById('qcard-' + ids[nombre]);
+            if (!card) return;
+            var cab = card.querySelector('.quiniela-nombre');
+            if (!cab) return;
+            var pts = puntos[nombre] || 0;
+            cab.innerHTML = nombre + ' <span style="font-size:0.75rem;font-weight:600;opacity:0.85;">(' + pts + ' pts)</span>';
+          });
         }
 
         // ===== CARGA CLASIFICACIONES DESDE API =====
@@ -1304,7 +1314,7 @@
         </div>
 
         <div class="quiniela-card" id="qcard-inna">
-          <div class="quiniela-nombre" style="background:#FF80AB;color:#000;">Inna</div>
+          <div class="quiniela-nombre" style="background:#FF80AB;color:#fff;">Inna</div>
           <ul>
             <li data-fl="ma"><img src="https://flagcdn.com/w40/ma.png" alt="Marruecos"> Marruecos</li>
             <li data-fl="iq"><img src="https://flagcdn.com/w40/iq.png" alt="Irak"> Irak</li>
@@ -1360,7 +1370,7 @@
         </div>
 
         <div class="quiniela-card" id="qcard-miguel">
-          <div class="quiniela-nombre" style="background:#FDD835;color:#000;">Miguel</div>
+          <div class="quiniela-nombre" style="background:#FDD835;color:#fff;">Miguel</div>
           <ul>
             <li data-fl="ba"><img src="https://flagcdn.com/w40/ba.png" alt="Bosnia"> Bosnia y Herzegovina</li>
             <li data-fl="dz"><img src="https://flagcdn.com/w40/dz.png" alt="Argelia"> Argelia</li>
