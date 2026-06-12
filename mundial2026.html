@@ -368,6 +368,55 @@
       flex-shrink: 0;
     }
 
+    /* NAV TABS */
+    .nav-tabs {
+      display: flex;
+      background: #D4B896;
+      border-bottom: 3px solid var(--dorado);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-tabs button {
+      flex: 1;
+      padding: 14px 8px;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      text-transform: uppercase;
+      border-bottom: 3px solid transparent;
+      transition: background 0.2s;
+    }
+    .nav-tabs button.activo {
+      background: rgba(255,255,255,0.15);
+      border-bottom: 3px solid var(--dorado);
+      color: var(--dorado);
+    }
+    .sub-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .sub-tabs button {
+      padding: 8px 20px;
+      border: 2px solid #D4B896;
+      border-radius: 20px;
+      background: #FDE8F0;
+      color: #000;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .sub-tabs button.activo {
+      background: #D4B896;
+      color: #fff;
+    }
+    .oculto { display: none !important; }
+
     /* RESPONSIVE */
     @media (max-width: 900px) {
       .grupos-grid { grid-template-columns: repeat(2, 1fr); }
@@ -424,12 +473,18 @@
     <div id="partidos-vivo"></div>
   </div>
 
+  <nav class="nav-tabs">
+    <button class="activo" onclick="mostrarTab('grupos')">⚽ Grupos</button>
+    <button onclick="mostrarTab('calendario')">📅 Calendario</button>
+    <button onclick="mostrarTab('quiniela')">🏆 Quiniela</button>
+  </nav>
+
   <main>
 
     <section id="grupos" class="seccion" style="max-width:none;">
       <h2>Fase de Grupos</h2>
       <div style="display:flex; gap:20px; align-items:flex-start;">
-      <div class="grupos-grid" style="flex-shrink:0; width:min(1060px, calc(100vw - 40px));">
+      <div id="panel-grupos" class="grupos-grid" style="flex-shrink:0; width:min(1060px, calc(100vw - 40px));">
 
         <div class="grupo-card" id="grupo-A">
           <div class="grupo-titulo">GRUPO A</div>
@@ -554,7 +609,7 @@
       </div>
 
       <!-- CALENDARIO -->
-      <div style="flex:1; min-width:180px; background:#FDE8F0; border:1px solid #D4B896; border-radius:10px; overflow:hidden;">
+      <div id="panel-calendario" class="oculto" style="flex:1; min-width:180px; background:#FDE8F0; border:1px solid #D4B896; border-radius:10px; overflow:hidden;">
         <!-- Cabecera con flechas -->
         <div style="background:#D4B896; color:#fff; font-weight:800; font-size:0.9rem; letter-spacing:2px; padding:10px 14px; text-align:center; border-bottom:2px solid var(--dorado); display:flex; align-items:center; justify-content:space-between;">
           <button onclick="cambiarMes(-1)" style="background:none;border:none;color:var(--dorado);font-size:1.1rem;cursor:pointer;padding:0 6px;">&#8249;</button>
@@ -1194,14 +1249,44 @@
         cargarResultados();
         setInterval(cargarClasificaciones, 900000);
 
+        function mostrarTab(tab) {
+          var panelGrupos = document.getElementById('panel-grupos');
+          var panelCal = document.getElementById('panel-calendario');
+          var secQuiniela = document.getElementById('quiniela');
+          panelGrupos.classList.add('oculto');
+          panelCal.classList.add('oculto');
+          secQuiniela.classList.add('oculto');
+          if (tab === 'grupos') panelGrupos.classList.remove('oculto');
+          else if (tab === 'calendario') panelCal.classList.remove('oculto');
+          else if (tab === 'quiniela') secQuiniela.classList.remove('oculto');
+          document.querySelectorAll('.nav-tabs button').forEach(function(b) { b.classList.remove('activo'); });
+          var idx = tab === 'grupos' ? 0 : tab === 'calendario' ? 1 : 2;
+          document.querySelectorAll('.nav-tabs button')[idx].classList.add('activo');
+        }
+
+        function mostrarSubTab(sub) {
+          var panelEq = document.getElementById('panel-equipos');
+          var panelClas = document.getElementById('panel-clasificacion');
+          panelEq.classList.add('oculto');
+          panelClas.classList.add('oculto');
+          if (sub === 'equipos') panelEq.classList.remove('oculto');
+          else panelClas.classList.remove('oculto');
+          document.querySelectorAll('.sub-tabs button').forEach(function(b) { b.classList.remove('activo'); });
+          document.querySelectorAll('.sub-tabs button')[sub === 'equipos' ? 0 : 1].classList.add('activo');
+        }
+
       </script>
       </div><!-- fin flex -->
     </section>
 
 
-    <section id="quiniela" class="seccion" style="max-width:none;">
+    <section id="quiniela" class="seccion oculto" style="max-width:none;">
       <h2>Quiniela</h2>
-      <div style="display:flex; gap:20px; align-items:flex-start;">
+      <div class="sub-tabs">
+        <button class="activo" onclick="mostrarSubTab('equipos')">Equipos</button>
+        <button onclick="mostrarSubTab('clasificacion')">Clasificación</button>
+      </div>
+      <div id="panel-equipos" style="display:flex; gap:20px; align-items:flex-start;">
       <div class="quiniela-grid" style="flex-shrink:0; width:min(840px, calc(100vw - 40px));">
 
         <div class="quiniela-card" id="qcard-inigo">
@@ -1290,13 +1375,16 @@
 
       </div>
 
+      </div><!-- fin panel-equipos -->
+
       <!-- RANKING QUINIELA -->
+      <div id="panel-clasificacion" class="oculto">
       <div id="ranking-quiniela" style="flex:1; min-width:200px; background:#FDE8F0; border:1px solid #D4B896; border-radius:10px; overflow:hidden;">
         <div style="background:#D4B896;color:#fff;font-weight:800;font-size:0.85rem;letter-spacing:2px;padding:10px 14px;border-bottom:2px solid var(--dorado);">CLASIFICACIÓN</div>
         <div style="padding:14px;color:#555;font-size:0.8rem;">Esperando resultados...</div>
       </div>
 
-      </div>
+      </div><!-- fin panel-clasificacion -->
     </section>
 
   </main>
