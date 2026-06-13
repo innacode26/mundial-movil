@@ -590,15 +590,22 @@
             else if (d.knockout.indexOf(n) >= 0) st += 'border-radius:4px;background:rgba(200,16,46,0.5);color:#fff;font-weight:600;';
             else if (d.grupo.indexOf(n) >= 0) st += 'border-radius:4px;background:rgba(34,139,34,0.6);color:#fff;font-weight:600;';
             else st += 'border-radius:4px;color:var(--dorado);';
-            html += '<div style="' + st + '" onclick="mostrarPartidos(' + n + ',' + mes + ')">' + n + '</div>';
+            html += '<div style="' + st + '" data-n="' + n + '" onclick="mostrarPartidos(' + n + ',' + mes + ')">' + n + '</div>';
           }
           document.getElementById('cal-dias').innerHTML = html;
           document.getElementById('partidos-dia').innerHTML = '';
+          if (diaVisto !== null && mesVisto === mes) {
+            var sel = document.querySelector('#cal-dias [data-n="' + diaVisto + '"]');
+            if (sel) { sel.style.outline = '2.5px solid #333'; sel.style.outlineOffset = '2px'; }
+          }
         }
 
         var diaVisto = null, mesVisto = null;
         function mostrarPartidos(dia, mes) {
           diaVisto = dia; mesVisto = mes;
+          document.querySelectorAll('#cal-dias [data-n]').forEach(function(el) { el.style.outline = ''; el.style.outlineOffset = ''; });
+          var sel = document.querySelector('#cal-dias [data-n="' + dia + '"]');
+          if (sel) { sel.style.outline = '2.5px solid #333'; sel.style.outlineOffset = '2px'; }
           var key = dia + '-' + mes;
           var lista = partidos[key];
           var mesesNombres = {6:'junio',7:'julio'};
