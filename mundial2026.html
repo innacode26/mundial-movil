@@ -686,9 +686,11 @@
           return found;
         }
 
-        function procesarResultadosData(data) {
+        function procesarResultadosData(data, fecha) {
           if (!data.events) return;
           var huboNuevos = false;
+          var fechaNum = parseInt(fecha) || 0;
+          var huboKnockout = false;
           data.events.forEach(function(event) {
             var comp = event.competitions && event.competitions[0];
             if (!comp) return;
@@ -700,23 +702,39 @@
             var flHome = buscarFl(home.team.displayName);
             var flAway = buscarFl(away.team.displayName);
             if (flHome && flAway) {
-              resultadosCache[flHome + '-' + flAway] = parseInt(home.score) + '-' + parseInt(away.score);
-              resultadosCache[flAway + '-' + flHome] = parseInt(away.score) + '-' + parseInt(home.score);
+              var gH = parseInt(home.score) || 0;
+              var gA = parseInt(away.score) || 0;
+              resultadosCache[flHome + '-' + flAway] = gH + '-' + gA;
+              resultadosCache[flAway + '-' + flHome] = gA + '-' + gH;
               huboNuevos = true;
+              // Detectar victoria en eliminatoria
+              var ptsRonda = rondasKnockout[fechaNum] || 0;
+              if (fechaNum === 20260704) {
+                // El 4 jul hay 16avos (03:00 CEST=01:00 UTC) y octavos (19:00 CEST=17:00 UTC)
+                var eventDate = new Date(event.date || 0);
+                ptsRonda = eventDate.getUTCHours() < 12 ? 4 : 5;
+              }
+              if (ptsRonda > 0 && gH !== gA) {
+                var flGanador = gH > gA ? flHome : flAway;
+                vicKnockout[flGanador] = (vicKnockout[flGanador] || 0) + ptsRonda;
+                huboKnockout = true;
+              }
             }
           });
           if (huboNuevos && diaVisto !== null) mostrarPartidos(diaVisto, mesVisto);
+          if (huboKnockout) renderRankingQuiniela();
         }
 
         function cargarResultados() {
+          vicKnockout = {};
           var hoy = new Date();
-          for (var i = 0; i <= 32; i++) {
+          for (var i = 0; i <= 40; i++) {
             var d = new Date(2026, 5, 11 + i);
             if (d > hoy) break;
             (function(fecha) {
               fetch('https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/scoreboard?dates=' + fecha + '&limit=50')
               .then(function(r) { return r.json(); })
-              .then(procesarResultadosData)
+              .then(function(data) { procesarResultadosData(data, fecha); })
               .catch(function() {});
             })('' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0'));
           }
@@ -764,8 +782,18 @@
           });
         });
 
-        // Puntos por victorias en eliminatorias (fl -> pts acumulados)
-        var puntosKnockout = {};
+        // Puntos por ronda eliminatoria según fecha
+        var rondasKnockout = {
+          20260628:4,20260629:4,20260630:4,
+          20260701:4,20260702:4,20260703:4,
+          // 20260704: mixto (ver lógica en procesarResultadosData)
+          20260705:5,20260706:5,20260707:5,
+          20260709:6,20260710:6,20260711:6,20260712:6,
+          20260714:8,20260715:8,
+          20260719:10
+        };
+        // fl -> pts acumulados en eliminatorias (se recalcula en cada carga)
+        var vicKnockout = {};
 
         var standingsAPI = {};
         var paisesEliminados = {};
@@ -861,7 +889,10 @@
         window.addEventListener('DOMContentLoaded', function() {
           if (new Date() >= new Date(2026, 5, 28)) {
             document.querySelectorAll('.grupo-titulo').forEach(function(el) { el.style.display = 'none'; });
+            document.querySelectorAll('.pts-real').forEach(function(el) { el.style.display = 'none'; });
           }
+          paisesEliminados['za'] = true;
+          actualizarEliminadosEnPagina();
           actualizarPuntosQuiniela();
           renderRankingQuiniela();
         });
@@ -870,7 +901,10 @@
         function actualizarEliminadosEnPagina() {
           document.querySelectorAll('[data-fl]').forEach(function(li) {
             var fl = li.getAttribute('data-fl');
-            li.style.opacity = paisesEliminados[fl] ? '0.35' : '';
+            var elim = paisesEliminados[fl];
+            li.style.opacity = elim ? '0.4' : '';
+            li.style.textDecoration = elim ? 'line-through' : '';
+            li.style.color = elim ? '#999' : '';
           });
         }
 
@@ -1085,7 +1119,7 @@
     </section>
 
 
-    <section id="quiniela" class="seccion oculto" style="max-width:none; padding-top:16px;">
+    <section id="quiniela" class="seccion oculto" style="max-width:none;">
       <div class="sub-tabs">
         <button class="activo" onclick="mostrarSubTab('equipos')">Equipos</button>
         <button onclick="mostrarSubTab('clasificacion')">Clasificación</button>
