@@ -891,8 +891,6 @@
             document.querySelectorAll('.grupo-titulo').forEach(function(el) { el.style.display = 'none'; });
             document.querySelectorAll('.pts-real').forEach(function(el) { el.style.display = 'none'; });
           }
-          paisesEliminados['za'] = true;
-          actualizarEliminadosEnPagina();
           actualizarPuntosQuiniela();
           renderRankingQuiniela();
         });
@@ -1089,15 +1087,23 @@
         setInterval(cargarClasificaciones, 900000);
 
         function mostrarTab(tab) {
+          var secGrupos = document.getElementById('grupos');
           var panelGrupos = document.getElementById('panel-grupos');
           var panelCal = document.getElementById('panel-calendario');
           var secQuiniela = document.getElementById('quiniela');
-          panelGrupos.classList.add('oculto');
-          panelCal.classList.add('oculto');
+          secGrupos.classList.add('oculto');
           secQuiniela.classList.add('oculto');
-          if (tab === 'grupos') panelGrupos.classList.remove('oculto');
-          else if (tab === 'calendario') panelCal.classList.remove('oculto');
-          else if (tab === 'quiniela') secQuiniela.classList.remove('oculto');
+          if (tab === 'grupos') {
+            secGrupos.classList.remove('oculto');
+            panelGrupos.classList.remove('oculto');
+            panelCal.classList.add('oculto');
+          } else if (tab === 'calendario') {
+            secGrupos.classList.remove('oculto');
+            panelGrupos.classList.add('oculto');
+            panelCal.classList.remove('oculto');
+          } else if (tab === 'quiniela') {
+            secQuiniela.classList.remove('oculto');
+          }
           document.querySelectorAll('.nav-tabs button').forEach(function(b) { b.classList.remove('activo'); });
           var idx = tab === 'grupos' ? 0 : tab === 'calendario' ? 1 : 2;
           document.querySelectorAll('.nav-tabs button')[idx].classList.add('activo');
