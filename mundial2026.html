@@ -924,10 +924,10 @@
           });
 
           // Puntos eliminatoria (victoria 16avos:4, octavos:5, cuartos:6, semis:8, final:10)
-          Object.keys(puntosKnockout).forEach(function(fl) {
+          Object.keys(vicKnockout).forEach(function(fl) {
             Object.keys(quinielaData).forEach(function(nombre) {
               if (quinielaData[nombre].indexOf(fl) >= 0) {
-                puntos[nombre] += puntosKnockout[fl];
+                puntos[nombre] += vicKnockout[fl];
               }
             });
           });
