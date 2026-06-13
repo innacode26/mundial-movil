@@ -299,7 +299,7 @@
       display: flex;
       gap: 10px;
       margin-bottom: 16px;
-      padding-top: 30px;
+      padding-top: 10px;
     }
     .sub-tabs button {
       padding: 8px 20px;
@@ -847,6 +847,15 @@
               li.appendChild(badge);
             }
             badge.textContent = pts + 'p';
+          });
+          document.querySelectorAll('.quiniela-card ul').forEach(function(ul) {
+            var items = Array.prototype.slice.call(ul.querySelectorAll('li[data-fl]'));
+            items.sort(function(a, b) {
+              var pA = ptsEquipo[a.getAttribute('data-fl')] || 0;
+              var pB = ptsEquipo[b.getAttribute('data-fl')] || 0;
+              return pB - pA;
+            });
+            items.forEach(function(li) { ul.appendChild(li); });
           });
         }
 
