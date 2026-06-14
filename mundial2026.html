@@ -513,10 +513,13 @@
         <!-- Días -->
         <div id="cal-dias" style="display:grid; grid-template-columns:repeat(7,1fr); gap:3px; padding:0 10px 10px;"></div>
         <!-- Leyenda -->
-        <div style="padding:8px 12px 6px; font-size:0.7rem; color:#333; display:flex; gap:10px; flex-wrap:wrap;">
+        <div style="padding:8px 12px 6px; font-size:0.7rem; color:#333; display:flex; gap:8px; flex-wrap:wrap;">
           <span><span style="display:inline-block;width:10px;height:10px;background:#C2185B;border-radius:50%;margin-right:4px;vertical-align:middle;"></span>Hoy</span>
           <span><span style="display:inline-block;width:10px;height:10px;background:rgba(34,139,34,0.7);border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Grupos</span>
-          <span><span style="display:inline-block;width:10px;height:10px;background:rgba(200,16,46,0.6);border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Eliminat.</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:rgba(220,120,0,0.85);border-radius:2px;margin-right:4px;vertical-align:middle;"></span>16avos</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:rgba(200,50,30,0.85);border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Octavos</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:rgba(160,0,80,0.85);border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Cuartos</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:rgba(100,0,160,0.85);border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Semis</span>
           <span><span style="display:inline-block;width:10px;height:10px;background:var(--dorado);border-radius:2px;margin-right:4px;vertical-align:middle;"></span>Final</span>
         </div>
         <div id="partidos-dia" style="border-top:1px solid #D4B896;"></div>
@@ -532,8 +535,8 @@
         var _hoyMes = _hoy.getMonth(); // 5=junio, 6=julio
         var _hoyDia = _hoy.getDate();
         var calData = [
-          { offset: 0, dias: 30, grupo: [11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27], knockout: [28,29,30], hoy: (_hoyMes === 5 ? _hoyDia : null), final: [] },
-          { offset: 2, dias: 31, grupo: [], knockout: [1,2,3,4,5,6,7,9,10,11,12,14,15,18], hoy: (_hoyMes === 6 ? _hoyDia : null), final: [19] }
+          { offset: 0, dias: 30, grupo: [11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27], d16: [28,29,30], oct: [], cua: [], sem: [], ter: [], hoy: (_hoyMes === 5 ? _hoyDia : null), final: [] },
+          { offset: 2, dias: 31, grupo: [], d16: [1,2,3,4], oct: [5,6,7], cua: [9,10,11,12], sem: [14,15], ter: [18], hoy: (_hoyMes === 6 ? _hoyDia : null), final: [19] }
         ];
 
         // Partidos por día (hora España = hora UK + 1)
@@ -587,7 +590,11 @@
             var tienePartido = partidos[key] && partidos[key].length > 0;
             if (n === d.hoy) st += 'border-radius:50%;background:#C2185B;color:#fff;font-weight:900;';
             else if (d.final.indexOf(n) >= 0) st += 'border-radius:4px;background:var(--dorado);color:var(--azul);font-weight:900;';
-            else if (d.knockout.indexOf(n) >= 0) st += 'border-radius:4px;background:rgba(200,16,46,0.5);color:#fff;font-weight:600;';
+            else if (d.ter && d.ter.indexOf(n) >= 0) st += 'border-radius:4px;background:rgba(100,110,130,0.85);color:#fff;font-weight:600;';
+            else if (d.sem && d.sem.indexOf(n) >= 0) st += 'border-radius:4px;background:rgba(100,0,160,0.85);color:#fff;font-weight:700;';
+            else if (d.cua && d.cua.indexOf(n) >= 0) st += 'border-radius:4px;background:rgba(160,0,80,0.85);color:#fff;font-weight:700;';
+            else if (d.oct && d.oct.indexOf(n) >= 0) st += 'border-radius:4px;background:rgba(200,50,30,0.85);color:#fff;font-weight:600;';
+            else if (d.d16 && d.d16.indexOf(n) >= 0) st += 'border-radius:4px;background:rgba(220,120,0,0.85);color:#fff;font-weight:600;';
             else if (d.grupo.indexOf(n) >= 0) st += 'border-radius:4px;background:rgba(34,139,34,0.6);color:#fff;font-weight:600;';
             else st += 'border-radius:4px;color:var(--dorado);';
             html += '<div style="' + st + '" data-n="' + n + '" onclick="mostrarPartidos(' + n + ',' + mes + ')">' + n + '</div>';
@@ -614,7 +621,7 @@
             var d = calData[mes === 6 ? 0 : 1];
             if (d.final.indexOf(dia) >= 0) {
               contenedor.innerHTML = '<div style="padding:10px;color:var(--dorado);font-size:0.82rem;font-weight:700;">🏆 Final del Mundial</div>';
-            } else if (d.knockout.indexOf(dia) >= 0) {
+            } else if ((d.d16 && d.d16.indexOf(dia) >= 0) || (d.oct && d.oct.indexOf(dia) >= 0) || (d.cua && d.cua.indexOf(dia) >= 0) || (d.sem && d.sem.indexOf(dia) >= 0) || (d.ter && d.ter.indexOf(dia) >= 0)) {
               contenedor.innerHTML = '<div style="padding:10px;color:#aaa;font-size:0.82rem;">Equipos por determinar</div>';
             } else {
               contenedor.innerHTML = '<div style="padding:10px;color:#555;font-size:0.8rem;">No hay partidos este día.</div>';
