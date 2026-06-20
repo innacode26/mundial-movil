@@ -786,7 +786,7 @@
           'Inna':    {hex:'#FF80AB', rgba:'rgba(255,128,171,0.25)'},
           'Ainhara': {hex:'#1E88E5', rgba:'rgba(30,136,229,0.18)'},
           'Tere':    {hex:'#4527A0', rgba:'rgba(69,39,160,0.22)'},
-          'Nacho':   {hex:'#43A047', rgba:'rgba(67,160,71,0.18)'},
+          'Nacho':   {hex:'#00BCD4', rgba:'rgba(0,188,212,0.18)'},
           'Miguel':  {hex:'#FDD835', rgba:'rgba(253,216,53,0.25)'}
         };
 
@@ -850,8 +850,11 @@
           data.forEach(function(team, idx) {
             var elim = paisesEliminados[team.fl];
             var colorTeam = colorPorEquipo[team.fl];
-            var rowStyle = elim ? 'opacity:0.38;' : (confirmado[idx] ? 'background:rgba(34,139,34,0.28);' : '');
-            if (colorTeam && !elim) rowStyle += 'background:' + colorTeam.rgba + ';border-left:4px solid ' + colorTeam.hex + ';';
+            var rowStyle = elim ? 'background:rgba(220,50,50,0.18);opacity:0.6;' : (confirmado[idx] ? 'background:rgba(34,139,34,0.28);' : '');
+            if (colorTeam && !elim) {
+              if (!confirmado[idx]) rowStyle += 'background:' + colorTeam.rgba + ';';
+              rowStyle += 'border-left:4px solid ' + colorTeam.hex + ';';
+            }
             var gdStr = team.gd > 0 ? '+' + team.gd : '' + team.gd;
             var gdCol = team.gd > 0 ? '#5cb85c' : team.gd < 0 ? '#d9534f' : '#888';
             html += '<div style="display:grid;grid-template-columns:14px 1fr 24px 28px 28px;gap:2px;align-items:center;padding:5px 10px;border-bottom:1px solid #D4B896;' + rowStyle + '">';
@@ -915,9 +918,9 @@
           document.querySelectorAll('[data-fl]').forEach(function(li) {
             var fl = li.getAttribute('data-fl');
             var elim = paisesEliminados[fl];
-            li.style.opacity = elim ? '0.4' : '';
+            li.style.opacity = elim ? '0.6' : '';
             li.style.textDecoration = elim ? 'line-through' : '';
-            li.style.color = elim ? '#999' : '';
+            li.style.color = elim ? '#c0392b' : '';
           });
         }
 
@@ -996,19 +999,19 @@
         // ===== CARGA CLASIFICACIONES DESDE API =====
         function actualizarEliminados() {
           paisesEliminados = {};
-          var cuartos = [], terceros = [], gruposCompletos = 0;
+          var terceros = [], gruposCompletos = 0;
           Object.keys(standingsAPI).forEach(function(letra) {
             var data = standingsAPI[letra];
             if (!data || data.length < 4) return;
             if (data.every(function(t) { return t.mp >= 3; })) {
               gruposCompletos++;
-              if (data[3].fl) cuartos.push(data[3]);
+              // 4º eliminado en cuanto termina su grupo
+              if (data[3].fl) paisesEliminados[data[3].fl] = true;
               if (data[2].fl) terceros.push(data[2]);
             }
           });
-          // Solo marcar eliminados cuando TODOS los 12 grupos han terminado
+          // Los 3os puestos: hay que esperar a los 12 grupos para comparar cuáles de los 12 pasan (los 8 mejores)
           if (gruposCompletos === 12) {
-            cuartos.forEach(function(t) { paisesEliminados[t.fl] = true; });
             terceros.sort(function(a, b) {
               if (b.pts !== a.pts) return b.pts - a.pts;
               if (b.gd !== a.gd) return b.gd - a.gd;
@@ -1021,7 +1024,7 @@
         }
 
         function cargarClasificaciones() {
-          fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/standings')
+          fetch('https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings')
           .then(function(r) { return r.json(); })
           .then(function(data) {
             if (!data.children) return;
