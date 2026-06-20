@@ -710,7 +710,7 @@
             var comp = event.competitions && event.competitions[0];
             if (!comp) return;
             var statusName = comp.status && comp.status.type && comp.status.type.name;
-            if (statusName !== 'STATUS_FINAL') return;
+            if (statusName !== 'STATUS_FINAL' && statusName !== 'STATUS_FULL_TIME') return;
             var home = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'home'; });
             var away = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'away'; });
             if (!home || !away) return;
