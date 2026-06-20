@@ -812,6 +812,7 @@
 
         var standingsAPI = {};
         var paisesEliminados = {};
+        var paisesClasificados = {};
 
         // ===== RENDER TARJETA GRUPO =====
         function renderGrupoCard(letra) {
@@ -850,9 +851,12 @@
           data.forEach(function(team, idx) {
             var elim = paisesEliminados[team.fl];
             var colorTeam = colorPorEquipo[team.fl];
-            var rowStyle = elim ? 'background:rgba(220,50,50,0.18);opacity:0.6;' : (confirmado[idx] ? 'background:rgba(34,139,34,0.28);' : '');
-            if (colorTeam && !elim) {
+            var clas = paisesClasificados[team.fl];
+            var rowStyle = elim ? 'background:rgba(220,50,50,0.18);opacity:0.6;' : (clas ? 'background:rgba(34,139,34,0.28);' : (confirmado[idx] ? 'background:rgba(34,139,34,0.15);' : ''));
+            if (colorTeam && !elim && !clas) {
               if (!confirmado[idx]) rowStyle += 'background:' + colorTeam.rgba + ';';
+              rowStyle += 'border-left:4px solid ' + colorTeam.hex + ';';
+            } else if (colorTeam && !elim) {
               rowStyle += 'border-left:4px solid ' + colorTeam.hex + ';';
             }
             var gdStr = team.gd > 0 ? '+' + team.gd : '' + team.gd;
@@ -918,9 +922,11 @@
           document.querySelectorAll('[data-fl]').forEach(function(li) {
             var fl = li.getAttribute('data-fl');
             var elim = paisesEliminados[fl];
+            var clas = paisesClasificados[fl];
             li.style.opacity = elim ? '0.6' : '';
             li.style.textDecoration = elim ? 'line-through' : '';
-            li.style.color = elim ? '#c0392b' : '';
+            li.style.color = elim ? '#c0392b' : (clas ? '#1b7a1b' : '');
+            li.style.fontWeight = clas ? '700' : '';
           });
         }
 
@@ -999,24 +1005,31 @@
         // ===== CARGA CLASIFICACIONES DESDE API =====
         function actualizarEliminados() {
           paisesEliminados = {};
+          paisesClasificados = {};
           var terceros = [], gruposCompletos = 0;
           Object.keys(standingsAPI).forEach(function(letra) {
             var data = standingsAPI[letra];
             if (!data || data.length < 4) return;
             if (data.every(function(t) { return t.mp >= 3; })) {
               gruposCompletos++;
-              // 4º eliminado en cuanto termina su grupo
+              // 1º y 2º clasificados directamente
+              if (data[0].fl) paisesClasificados[data[0].fl] = true;
+              if (data[1].fl) paisesClasificados[data[1].fl] = true;
+              // 4º eliminado
               if (data[3].fl) paisesEliminados[data[3].fl] = true;
               if (data[2].fl) terceros.push(data[2]);
             }
           });
-          // Los 3os puestos: hay que esperar a los 12 grupos para comparar cuáles de los 12 pasan (los 8 mejores)
+          // Los 3os puestos: hay que esperar a los 12 grupos para saber cuáles de los 12 pasan (los 8 mejores)
           if (gruposCompletos === 12) {
             terceros.sort(function(a, b) {
               if (b.pts !== a.pts) return b.pts - a.pts;
               if (b.gd !== a.gd) return b.gd - a.gd;
               return b.gf - a.gf;
             });
+            for (var i = 0; i < 8; i++) {
+              if (terceros[i] && terceros[i].fl) paisesClasificados[terceros[i].fl] = true;
+            }
             for (var i = 8; i < 12; i++) {
               if (terceros[i] && terceros[i].fl) paisesEliminados[terceros[i].fl] = true;
             }
