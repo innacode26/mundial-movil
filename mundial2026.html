@@ -747,7 +747,7 @@
             var d = new Date(2026, 5, 11 + i);
             if (d > hoy) break;
             (function(fecha) {
-              fetch('https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/scoreboard?dates=' + fecha + '&limit=50')
+              fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=' + fecha + '&limit=50')
               .then(function(r) { return r.json(); })
               .then(function(data) { procesarResultadosData(data, fecha); })
               .catch(function() {});
@@ -1021,7 +1021,7 @@
         }
 
         function cargarClasificaciones() {
-          fetch('https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings')
+          fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/standings')
           .then(function(r) { return r.json(); })
           .then(function(data) {
             if (!data.children) return;
