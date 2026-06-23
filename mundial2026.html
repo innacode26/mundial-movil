@@ -840,13 +840,6 @@
           var confirmado = [false, false, false, false];
           if (grupoCompleto) {
             confirmado[0] = confirmado[1] = true;
-          } else if (data[0].mp > 0) {
-            for (var ci = 0; ci < 2 && ci < data.length; ci++) {
-              var rival = data[ci + 1];
-              if (!rival) { confirmado[ci] = true; continue; }
-              var maxRival = rival.pts + Math.max(0, 3 - rival.mp) * 3;
-              confirmado[ci] = data[ci].pts > maxRival;
-            }
           }
           data.forEach(function(team, idx) {
             var elim = paisesEliminados[team.fl];
