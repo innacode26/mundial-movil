@@ -845,21 +845,19 @@
             var elim = paisesEliminados[team.fl];
             var colorTeam = colorPorEquipo[team.fl];
             var clas = paisesClasificados[team.fl];
-            var rowStyle = elim ? 'background:rgba(220,50,50,0.18);opacity:0.6;' : (clas ? 'background:rgba(22,160,22,0.65);' : (confirmado[idx] ? 'background:rgba(22,160,22,0.50);' : ''));
-            if (colorTeam && !elim && !clas) {
-              if (!confirmado[idx]) rowStyle += 'background:' + colorTeam.rgba + ';';
-              rowStyle += 'border-left:4px solid ' + colorTeam.hex + ';';
-            } else if (colorTeam && !elim) {
-              rowStyle += 'border-left:4px solid ' + colorTeam.hex + ';';
+            var rowStyle = elim ? 'background:rgba(220,50,50,0.18);opacity:0.6;' : '';
+            if (colorTeam && !elim) {
+              rowStyle += 'background:' + colorTeam.rgba + ';border-left:4px solid ' + colorTeam.hex + ';';
             }
             var gdStr = team.gd > 0 ? '+' + team.gd : '' + team.gd;
-            var filaVerde = !elim && (clas || confirmado[idx]);
-            var gdCol = team.gd > 0 ? (filaVerde ? '#004d00' : '#5cb85c') : team.gd < 0 ? '#d9534f' : '#888';
+            var gdCol = team.gd > 0 ? '#5cb85c' : team.gd < 0 ? '#d9534f' : '#888';
+            var clasificado = !elim && (clas || confirmado[idx]);
+            var nameColor = elim ? 'color:#c0392b;text-decoration:line-through;' : (clasificado ? 'color:#006400;font-weight:700;' : 'color:#000;');
             html += '<div style="display:grid;grid-template-columns:14px 1fr 24px 28px 28px;gap:2px;align-items:center;padding:5px 10px;border-bottom:1px solid #D4B896;' + rowStyle + '">';
             html += '<div style="font-size:0.65rem;color:#666;text-align:center;">' + (idx+1) + '</div>';
             html += '<div style="display:flex;align-items:center;gap:5px;min-width:0;">';
             html += '<img src="https://flagcdn.com/w40/' + team.fl + '.png" style="width:22px;height:15px;object-fit:cover;border-radius:2px;border:1px solid #444;flex-shrink:0;">';
-            html += '<span style="font-size:0.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#000;' + (elim ? 'text-decoration:line-through;color:#c0392b;' : '') + '">' + team.n + '</span>';
+            html += '<span style="font-size:0.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;' + nameColor + '">' + team.n + '</span>';
             if (elim) html += ' <span style="font-size:0.65rem;color:var(--rojo);flex-shrink:0;">✕</span>';
             html += '</div>';
             html += '<div style="font-size:0.73rem;text-align:center;color:#888;">' + team.mp + '</div>';
