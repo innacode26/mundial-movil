@@ -845,8 +845,8 @@
             var elim = paisesEliminados[team.fl];
             var colorTeam = colorPorEquipo[team.fl];
             var clas = paisesClasificados[team.fl];
-            var rowStyle = elim ? 'background:rgba(220,50,50,0.18);opacity:0.6;' : '';
-            if (colorTeam && !elim) {
+            var rowStyle = '';
+            if (colorTeam) {
               rowStyle += 'background:' + colorTeam.rgba + ';border-left:4px solid ' + colorTeam.hex + ';';
             }
             var gdStr = team.gd > 0 ? '+' + team.gd : '' + team.gd;
