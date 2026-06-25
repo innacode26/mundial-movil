@@ -1003,14 +1003,26 @@
           Object.keys(standingsAPI).forEach(function(letra) {
             var data = standingsAPI[letra];
             if (!data || data.length < 4) return;
-            if (data.every(function(t) { return t.mp >= 3; })) {
+            var sorted = data.slice().sort(function(a,b) {
+              if (b.pts !== a.pts) return b.pts - a.pts;
+              if (b.gd !== a.gd) return b.gd - a.gd;
+              return b.gf - a.gf;
+            });
+            if (sorted.every(function(t) { return t.mp >= 3; })) {
               gruposCompletos++;
-              // 1º y 2º clasificados directamente
-              if (data[0].fl) paisesClasificados[data[0].fl] = true;
-              if (data[1].fl) paisesClasificados[data[1].fl] = true;
-              // 4º eliminado
-              if (data[3].fl) paisesEliminados[data[3].fl] = true;
-              if (data[2].fl) terceros.push(data[2]);
+              if (sorted[0].fl) paisesClasificados[sorted[0].fl] = true;
+              if (sorted[1].fl) paisesClasificados[sorted[1].fl] = true;
+              if (sorted[3].fl) paisesEliminados[sorted[3].fl] = true;
+              if (sorted[2].fl) terceros.push(sorted[2]);
+            } else {
+              // Eliminación matemática: ni ganando todos los partidos restantes pueden superar al 3º actual
+              var ptsTercero = sorted[2] ? sorted[2].pts : 0;
+              sorted.forEach(function(team) {
+                var maxPts = team.pts + (3 - team.mp) * 3;
+                if (ptsTercero > 0 && maxPts < ptsTercero && team.fl) {
+                  paisesEliminados[team.fl] = true;
+                }
+              });
             }
           });
           // Los 3os puestos: hay que esperar a los 12 grupos para saber cuáles de los 12 pasan (los 8 mejores)
@@ -1066,9 +1078,9 @@
                   gd: stats.pointDifferential || 0
                 };
               });
-              renderGrupoCard(letra);
             });
             actualizarEliminados();
+            Object.keys(standingsAPI).forEach(function(l) { renderGrupoCard(l); });
             actualizarEliminadosEnPagina();
             actualizarPuntosQuiniela();
             renderRankingQuiniela();
