@@ -853,7 +853,8 @@
               rowStyle += 'border-left:4px solid ' + colorTeam.hex + ';';
             }
             var gdStr = team.gd > 0 ? '+' + team.gd : '' + team.gd;
-            var gdCol = team.gd > 0 ? '#5cb85c' : team.gd < 0 ? '#d9534f' : '#888';
+            var filaVerde = !elim && (clas || confirmado[idx]);
+            var gdCol = team.gd > 0 ? (filaVerde ? '#004d00' : '#5cb85c') : team.gd < 0 ? '#d9534f' : '#888';
             html += '<div style="display:grid;grid-template-columns:14px 1fr 24px 28px 28px;gap:2px;align-items:center;padding:5px 10px;border-bottom:1px solid #D4B896;' + rowStyle + '">';
             html += '<div style="font-size:0.65rem;color:#666;text-align:center;">' + (idx+1) + '</div>';
             html += '<div style="display:flex;align-items:center;gap:5px;min-width:0;">';
