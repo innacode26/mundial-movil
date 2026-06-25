@@ -845,7 +845,7 @@
             var elim = paisesEliminados[team.fl];
             var colorTeam = colorPorEquipo[team.fl];
             var clas = paisesClasificados[team.fl];
-            var rowStyle = elim ? 'background:rgba(220,50,50,0.18);opacity:0.6;' : (clas ? 'background:rgba(34,139,34,0.28);' : (confirmado[idx] ? 'background:rgba(34,139,34,0.15);' : ''));
+            var rowStyle = elim ? 'background:rgba(220,50,50,0.18);opacity:0.6;' : (clas ? 'background:rgba(22,160,22,0.65);' : (confirmado[idx] ? 'background:rgba(22,160,22,0.50);' : ''));
             if (colorTeam && !elim && !clas) {
               if (!confirmado[idx]) rowStyle += 'background:' + colorTeam.rgba + ';';
               rowStyle += 'border-left:4px solid ' + colorTeam.hex + ';';
@@ -858,7 +858,7 @@
             html += '<div style="font-size:0.65rem;color:#666;text-align:center;">' + (idx+1) + '</div>';
             html += '<div style="display:flex;align-items:center;gap:5px;min-width:0;">';
             html += '<img src="https://flagcdn.com/w40/' + team.fl + '.png" style="width:22px;height:15px;object-fit:cover;border-radius:2px;border:1px solid #444;flex-shrink:0;">';
-            html += '<span style="font-size:0.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#000;">' + team.n + '</span>';
+            html += '<span style="font-size:0.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#000;' + (elim ? 'text-decoration:line-through;color:#c0392b;' : '') + '">' + team.n + '</span>';
             if (elim) html += ' <span style="font-size:0.65rem;color:var(--rojo);flex-shrink:0;">✕</span>';
             html += '</div>';
             html += '<div style="font-size:0.73rem;text-align:center;color:#888;">' + team.mp + '</div>';
