@@ -1014,15 +1014,6 @@
               if (sorted[1].fl) paisesClasificados[sorted[1].fl] = true;
               if (sorted[3].fl) paisesEliminados[sorted[3].fl] = true;
               if (sorted[2].fl) terceros.push(sorted[2]);
-            } else {
-              // Eliminación matemática: ni ganando todos los partidos restantes pueden superar al 3º actual
-              var ptsTercero = sorted[2] ? sorted[2].pts : 0;
-              sorted.forEach(function(team) {
-                var maxPts = team.pts + (3 - team.mp) * 3;
-                if (ptsTercero > 0 && maxPts < ptsTercero && team.fl) {
-                  paisesEliminados[team.fl] = true;
-                }
-              });
             }
           });
           // Los 3os puestos: hay que esperar a los 12 grupos para saber cuáles de los 12 pasan (los 8 mejores)
