@@ -705,6 +705,16 @@
           'pt':['Portugal'],'co':['Colombia'],'uz':['Uzbekistan'],'cd':['DR Congo','Congo DR','Democratic Republic of Congo'],
           'gb-eng':['England'],'hr':['Croatia'],'gh':['Ghana'],'pa':['Panama']
         };
+        function esPartidoDeGrupos(flHome, flAway) {
+          if (!flHome || !flAway) return false;
+          var mismoGrupo = false;
+          Object.keys(gruposData).forEach(function(g) {
+            var fls = gruposData[g].map(function(t) { return t.fl; });
+            if (fls.indexOf(flHome) >= 0 && fls.indexOf(flAway) >= 0) mismoGrupo = true;
+          });
+          return mismoGrupo;
+        }
+
         function buscarFl(apiName) {
           var nombre = apiName.toLowerCase();
           var found = null;
@@ -741,7 +751,8 @@
             var utcHour = eventDate.getUTCHours();
             var ptsRonda = rondasKnockout[fechaNum] || 0;
             if (fechaNum === 20260704) ptsRonda = utcHour < 12 ? 4 : 5;
-            var esKnockout = ptsRonda > 0 || fechaNum === 20260718 || fechaNum === 20260719;
+            var esKnockout = (ptsRonda > 0 || fechaNum === 20260718 || fechaNum === 20260719)
+                             && !esPartidoDeGrupos(flHome, flAway);
             var isFinal = statusName === 'STATUS_FINAL' || statusName === 'STATUS_FULL_TIME';
             if (isFinal && flHome && flAway) {
               var gH = parseInt(home.score) || 0;
@@ -860,12 +871,12 @@
         };
 
         var crucesPartidos = [
-          {id:'d16-1', ronda:'d16',n:1, fecha:'Jue 28 Jun',hora:'21:00'},
-          {id:'d16-2', ronda:'d16',n:2, fecha:'Vie 29 Jun',hora:'19:00'},
-          {id:'d16-3', ronda:'d16',n:3, fecha:'Vie 29 Jun',hora:'22:30'},
-          {id:'d16-4', ronda:'d16',n:4, fecha:'Sáb 30 Jun',hora:'03:00'},
-          {id:'d16-5', ronda:'d16',n:5, fecha:'Sáb 30 Jun',hora:'19:00'},
-          {id:'d16-6', ronda:'d16',n:6, fecha:'Sáb 30 Jun',hora:'23:00'},
+          {id:'d16-1', ronda:'d16',n:1, fecha:'Dom 28 Jun',hora:'21:00'},
+          {id:'d16-2', ronda:'d16',n:2, fecha:'Lun 29 Jun',hora:'19:00'},
+          {id:'d16-3', ronda:'d16',n:3, fecha:'Lun 29 Jun',hora:'22:30'},
+          {id:'d16-4', ronda:'d16',n:4, fecha:'Mar 30 Jun',hora:'03:00'},
+          {id:'d16-5', ronda:'d16',n:5, fecha:'Mar 30 Jun',hora:'19:00'},
+          {id:'d16-6', ronda:'d16',n:6, fecha:'Mar 30 Jun',hora:'23:00'},
           {id:'d16-7', ronda:'d16',n:7, fecha:'Mié 1 Jul', hora:'03:00'},
           {id:'d16-8', ronda:'d16',n:8, fecha:'Mié 1 Jul', hora:'18:00'},
           {id:'d16-9', ronda:'d16',n:9, fecha:'Mié 1 Jul', hora:'22:00'},
