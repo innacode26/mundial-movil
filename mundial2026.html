@@ -1228,8 +1228,10 @@
           var secQuiniela = document.getElementById('quiniela');
           secGrupos.classList.add('oculto');
           secQuiniela.classList.add('oculto');
+          var subTabs = document.getElementById('grupos-sub-tabs');
           if (tab === 'grupos') {
             secGrupos.classList.remove('oculto');
+            subTabs.classList.remove('oculto');
             panelGruposWrap.classList.remove('oculto');
             panelCruces.classList.add('oculto');
             panelCal.classList.add('oculto');
@@ -1238,11 +1240,11 @@
             document.querySelectorAll('#grupos-sub-tabs button')[0].classList.add('activo');
           } else if (tab === 'calendario') {
             secGrupos.classList.remove('oculto');
+            subTabs.classList.add('oculto');
             panelGruposWrap.classList.remove('oculto');
             panelCruces.classList.add('oculto');
             panelCal.classList.remove('oculto');
             panelGrupos.classList.add('oculto');
-            document.querySelectorAll('#grupos-sub-tabs button').forEach(function(b){b.classList.remove('activo');});
           } else if (tab === 'quiniela') {
             secQuiniela.classList.remove('oculto');
           }
