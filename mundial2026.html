@@ -732,7 +732,6 @@
             var comp = event.competitions && event.competitions[0];
             if (!comp) return;
             var statusName = comp.status && comp.status.type && comp.status.type.name;
-            if (statusName !== 'STATUS_FINAL' && statusName !== 'STATUS_FULL_TIME') return;
             var home = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'home'; });
             var away = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'away'; });
             if (!home || !away) return;
@@ -758,7 +757,7 @@
                 }
                 registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador);
               }
-            } else if (esKnockout) {
+            } else if (esKnockout && !isFinal) {
               // Partido programado: registrar equipos aunque no se haya jugado
               registrarResultadoCruce(fechaNum, utcHour, flHome || null, null, flAway || null, null, '');
             }
