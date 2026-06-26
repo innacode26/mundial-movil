@@ -350,32 +350,21 @@
     footer span { color: var(--dorado); }
 
     /* CUADRO FINAL */
-    .cruces-nav {
-      overflow-x: auto;
-      white-space: nowrap;
+    .bracket-scroll {
+      overflow: auto;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      padding: 16px 20px 20px;
+      max-height: 78vh;
+      cursor: grab;
     }
-    .cruces-nav::-webkit-scrollbar { display: none; }
-    .cruces-nav button { white-space: nowrap; }
-
-    .cruces-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      padding: 16px 0;
-    }
+    .bracket-scroll:active { cursor: grabbing; }
 
     .cruce-card {
       background: #fff;
-      border-radius: 10px;
+      border-radius: 7px;
       border: 1px solid #D4B896;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    @media (max-width: 500px) {
-      .cruces-grid { grid-template-columns: 1fr; }
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
     }
   </style>
 </head>
@@ -1011,16 +1000,7 @@
           }
           actualizarPuntosQuiniela();
           renderRankingQuiniela();
-          renderCruces();
-          // Auto-seleccionar la ronda activa según la fecha
-          var hoy = new Date();
-          var hoyNum = parseInt('' + hoy.getFullYear() + String(hoy.getMonth()+1).padStart(2,'0') + String(hoy.getDate()).padStart(2,'0'));
-          var autoRonda = 'd16';
-          if (hoyNum >= 20260705 && hoyNum <= 20260707) autoRonda = 'oct';
-          else if (hoyNum >= 20260709 && hoyNum <= 20260712) autoRonda = 'cua';
-          else if (hoyNum >= 20260714 && hoyNum <= 20260715) autoRonda = 'sem';
-          else if (hoyNum >= 20260718) autoRonda = 'fin';
-          mostrarRonda(autoRonda);
+          renderBracketLayout();
         });
 
         // ===== ACTUALIZAR ELIMINADOS EN QUINIELA =====
@@ -1301,29 +1281,99 @@
             + '</div>';
         }
 
-        function actualizarCrucesCard(id) {
-          var card = document.getElementById('cruce-card-' + id);
-          if (card) card.innerHTML = crearCruceCardContent(id);
+        function crearBracketCardContent(id) {
+          var info = crucesInfo[id];
+          var fl1 = info ? info.fl1 : '';
+          var eq1 = info ? info.eq1 : '?';
+          var fl2 = info ? info.fl2 : '';
+          var eq2 = info ? info.eq2 : '?';
+          var g1  = (info && info.g1 !== undefined) ? info.g1 : null;
+          var g2  = (info && info.g2 !== undefined) ? info.g2 : null;
+          var gan = info ? info.gan : '';
+          var flagH = function(fl) {
+            return fl ? '<img src="https://flagcdn.com/w40/' + fl + '.png" style="width:18px;height:12px;object-fit:cover;border-radius:1px;flex-shrink:0;">'
+                      : '<span style="display:inline-block;width:18px;height:12px;background:#ddd;border-radius:1px;flex-shrink:0;"></span>';
+          };
+          var dotH = function(fl) {
+            var c = colorPorEquipo[fl];
+            return c ? '<span style="width:6px;height:6px;border-radius:50%;background:' + c.hex + ';flex-shrink:0;display:inline-block;margin-left:2px;"></span>' : '';
+          };
+          var scoreBase = 'font-size:0.68rem;font-weight:900;color:var(--azul);margin-left:auto;padding-left:4px;flex-shrink:0;';
+          var nameBase  = 'font-size:0.68rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#111;';
+          var op1 = '', op2 = '', wt1 = '', wt2 = '';
+          if (gan) {
+            if (gan === fl1) { wt1 = 'font-weight:900;'; op2 = 'opacity:0.38;'; }
+            else             { wt2 = 'font-weight:900;'; op1 = 'opacity:0.38;'; }
+          }
+          var r1 = '<div style="display:flex;align-items:center;gap:4px;padding:4px 6px;' + op1 + '">' + flagH(fl1) + '<span style="' + nameBase + wt1 + '">' + eq1 + '</span>' + (g1 !== null ? '<span style="' + scoreBase + '">' + g1 + '</span>' : '') + dotH(fl1) + '</div>';
+          var r2 = '<div style="display:flex;align-items:center;gap:4px;padding:4px 6px;border-top:1px solid #ece3d8;' + op2 + '">' + flagH(fl2) + '<span style="' + nameBase + wt2 + '">' + eq2 + '</span>' + (g2 !== null ? '<span style="' + scoreBase + '">' + g2 + '</span>' : '') + dotH(fl2) + '</div>';
+          return r1 + r2;
         }
 
-        function renderCruces() {
-          ['d16','oct','cua','sem'].forEach(function(ronda) {
-            var panel = document.getElementById('panel-cruces-' + ronda);
-            if (!panel) return;
-            var html = '';
-            crucesPartidos.forEach(function(m) {
-              if (m.ronda === ronda) html += '<div id="cruce-card-' + m.id + '" class="cruce-card">' + crearCruceCardContent(m.id) + '</div>';
-            });
-            panel.innerHTML = html;
+        function actualizarCrucesCard(id) {
+          var card = document.getElementById('cruce-card-' + id);
+          if (card) card.innerHTML = crearBracketCardContent(id);
+        }
+
+        function renderBracketLayout() {
+          var wrap = document.getElementById('bracket-wrap');
+          if (!wrap) return;
+          var SLOT = 48, CARD_W = 158, GAP = 34, HDR = 26;
+          var rondas = [
+            {id:'d16', label:'16 AVOS', cnt:16},
+            {id:'oct', label:'OCTAVOS', cnt:8},
+            {id:'cua', label:'CUARTOS', cnt:4},
+            {id:'sem', label:'SEMIS',   cnt:2},
+            {id:'fin', label:'FINAL',   cnt:1}
+          ];
+          var totalH = 16 * SLOT;
+          var colX = rondas.map(function(_, ri) { return ri * (CARD_W + GAP); });
+          var totalW = colX[4] + CARD_W;
+
+          var html = '<div style="position:relative;width:' + totalW + 'px;height:' + (HDR + totalH + 70) + 'px;">';
+
+          // SVG connector lines
+          html += '<svg style="position:absolute;top:' + HDR + 'px;left:0;width:' + totalW + 'px;height:' + totalH + 'px;overflow:visible;" xmlns="http://www.w3.org/2000/svg">';
+          rondas.forEach(function(ronda, ri) {
+            if (ri >= rondas.length - 1) return;
+            var slotH = SLOT * Math.pow(2, ri);
+            var xR   = colX[ri] + CARD_W;
+            var xL   = colX[ri + 1];
+            var xMid = xR + GAP / 2;
+            for (var pi = 0; pi < ronda.cnt / 2; pi++) {
+              var y1 = pi * 2 * slotH + slotH / 2;
+              var y2 = pi * 2 * slotH + 3 * slotH / 2;
+              var yt = pi * 2 * slotH + slotH; // = pi * nextSlotH + nextSlotH/2
+              html += '<line x1="' + xR + '" y1="' + y1 + '" x2="' + xMid + '" y2="' + y1 + '" stroke="#C4A882" stroke-width="1.5"/>';
+              html += '<line x1="' + xR + '" y1="' + y2 + '" x2="' + xMid + '" y2="' + y2 + '" stroke="#C4A882" stroke-width="1.5"/>';
+              html += '<line x1="' + xMid + '" y1="' + y1 + '" x2="' + xMid + '" y2="' + y2 + '" stroke="#C4A882" stroke-width="1.5"/>';
+              html += '<line x1="' + xMid + '" y1="' + yt + '" x2="' + xL + '" y2="' + yt + '" stroke="#C4A882" stroke-width="1.5"/>';
+            }
           });
-          var panelFin = document.getElementById('panel-cruces-fin');
-          if (panelFin) {
-            var html = '<div style="font-size:0.78rem;font-weight:700;color:#666;text-align:center;margin-bottom:10px;letter-spacing:2px;text-transform:uppercase;">3er y 4º Puesto · Sáb 18 Jul</div>'
-              + '<div id="cruce-card-ter-1" class="cruce-card" style="margin-bottom:24px;max-width:420px;margin-left:auto;margin-right:auto;">' + crearCruceCardContent('ter-1') + '</div>'
-              + '<div style="font-size:0.92rem;font-weight:900;color:var(--dorado);text-align:center;margin-bottom:10px;letter-spacing:3px;text-transform:uppercase;">⭐ Final Mundial · Dom 19 Jul ⭐</div>'
-              + '<div id="cruce-card-fin-1" class="cruce-card" style="max-width:420px;margin-left:auto;margin-right:auto;">' + crearCruceCardContent('fin-1') + '</div>';
-            panelFin.innerHTML = html;
-          }
+          html += '</svg>';
+
+          // Cards
+          rondas.forEach(function(ronda, ri) {
+            var slotH = SLOT * Math.pow(2, ri);
+            var matches = crucesPartidos.filter(function(m) { return m.ronda === ronda.id; });
+            html += '<div style="position:absolute;top:0;left:' + colX[ri] + 'px;width:' + CARD_W + 'px;height:' + HDR + 'px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;color:' + crucesRondaColores[ronda.id] + ';letter-spacing:1.5px;">' + ronda.label + '</div>';
+            matches.forEach(function(match, mi) {
+              var slotTop = HDR + mi * slotH;
+              html += '<div style="position:absolute;top:' + slotTop + 'px;left:' + colX[ri] + 'px;width:' + CARD_W + 'px;height:' + slotH + 'px;display:flex;align-items:center;">'
+                + '<div id="cruce-card-' + match.id + '" class="cruce-card" style="width:100%;">' + crearBracketCardContent(match.id) + '</div>'
+                + '</div>';
+            });
+          });
+
+          // Tercer puesto below
+          var terTop = HDR + totalH + 16;
+          html += '<div style="position:absolute;top:' + terTop + 'px;left:0;width:' + CARD_W + 'px;">'
+            + '<div style="font-size:0.58rem;font-weight:800;color:#888;letter-spacing:1px;text-align:center;margin-bottom:4px;">3ER Y 4º PUESTO · SÁB 18 JUL</div>'
+            + '<div id="cruce-card-ter-1" class="cruce-card">' + crearBracketCardContent('ter-1') + '</div>'
+            + '</div>';
+
+          html += '</div>';
+          wrap.innerHTML = html;
         }
 
         function registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador) {
@@ -1337,17 +1387,6 @@
           crucesFechaIdx[slotKey]++;
           crucesInfo[id] = {fl1:flHome, eq1:buscarNombrePorFl(flHome), g1:gH, fl2:flAway, eq2:buscarNombrePorFl(flAway), g2:gA, gan:flGanador};
           actualizarCrucesCard(id);
-        }
-
-        function mostrarRonda(ronda) {
-          ['d16','oct','cua','sem','fin'].forEach(function(r) {
-            document.getElementById('panel-cruces-' + r).classList.add('oculto');
-          });
-          document.getElementById('panel-cruces-' + ronda).classList.remove('oculto');
-          var btns = document.querySelectorAll('#cruces-nav-tabs button');
-          btns.forEach(function(b) { b.classList.remove('activo'); });
-          var idx = ['d16','oct','cua','sem','fin'].indexOf(ronda);
-          if (idx >= 0) btns[idx].classList.add('activo');
         }
 
         function mostrarSubTab(sub) {
@@ -1472,19 +1511,10 @@
       </div><!-- fin panel-clasificacion -->
     </section>
 
-    <section id="cruces" class="seccion oculto" style="max-width:none;">
-      <div class="sub-tabs cruces-nav" id="cruces-nav-tabs">
-        <button class="activo" onclick="mostrarRonda('d16')">16avos</button>
-        <button onclick="mostrarRonda('oct')">Octavos</button>
-        <button onclick="mostrarRonda('cua')">Cuartos</button>
-        <button onclick="mostrarRonda('sem')">Semis</button>
-        <button onclick="mostrarRonda('fin')">Final</button>
+    <section id="cruces" class="seccion oculto" style="max-width:none;padding-left:0;padding-right:0;">
+      <div class="bracket-scroll">
+        <div id="bracket-wrap"></div>
       </div>
-      <div id="panel-cruces-d16" class="cruces-grid"></div>
-      <div id="panel-cruces-oct" class="cruces-grid oculto"></div>
-      <div id="panel-cruces-cua" class="cruces-grid oculto"></div>
-      <div id="panel-cruces-sem" class="cruces-grid oculto"></div>
-      <div id="panel-cruces-fin" class="oculto" style="padding:16px 0;"></div>
     </section>
 
   </main>
