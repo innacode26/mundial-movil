@@ -735,31 +735,29 @@
             if (!home || !away) return;
             var flHome = buscarFl(home.team.displayName);
             var flAway = buscarFl(away.team.displayName);
-            if (flHome && flAway) {
+            var eventDate = new Date(event.date || 0);
+            var utcHour = eventDate.getUTCHours();
+            var ptsRonda = rondasKnockout[fechaNum] || 0;
+            if (fechaNum === 20260704) ptsRonda = utcHour < 12 ? 4 : 5;
+            var esKnockout = ptsRonda > 0 || fechaNum === 20260718 || fechaNum === 20260719;
+            var isFinal = statusName === 'STATUS_FINAL' || statusName === 'STATUS_FULL_TIME';
+            if (isFinal && flHome && flAway) {
               var gH = parseInt(home.score) || 0;
               var gA = parseInt(away.score) || 0;
               resultadosCache[flHome + '-' + flAway] = gH + '-' + gA;
               resultadosCache[flAway + '-' + flHome] = gA + '-' + gH;
               huboNuevos = true;
-              // Detectar victoria en eliminatoria
-              var ptsRonda = rondasKnockout[fechaNum] || 0;
-              var eventDate = new Date(event.date || 0);
-              var utcHour = eventDate.getUTCHours();
-              if (fechaNum === 20260704) {
-                // El 4 jul hay 16avos (03:00 CEST=01:00 UTC) y octavos (19:00 CEST=17:00 UTC)
-                ptsRonda = utcHour < 12 ? 4 : 5;
-              }
-              if (ptsRonda > 0 && gH !== gA) {
-                var flGanador = gH > gA ? flHome : flAway;
-                vicKnockout[flGanador] = (vicKnockout[flGanador] || 0) + ptsRonda;
-                huboKnockout = true;
+              if (esKnockout) {
+                var flGanador = gH !== gA ? (gH > gA ? flHome : flAway) : '';
+                if (ptsRonda > 0 && gH !== gA) {
+                  vicKnockout[flGanador] = (vicKnockout[flGanador] || 0) + ptsRonda;
+                  huboKnockout = true;
+                }
                 registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador);
               }
-              // Partido por el tercer puesto (no da pts quiniela pero se registra en el cuadro)
-              if (ptsRonda === 0 && fechaNum === 20260718 && gH !== gA) {
-                var flGanador3 = gH > gA ? flHome : flAway;
-                registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador3);
-              }
+            } else if (esKnockout) {
+              // Partido programado: registrar equipos aunque no se haya jugado
+              registrarResultadoCruce(fechaNum, utcHour, flHome || null, null, flAway || null, null, '');
             }
           });
           if (huboNuevos && diaVisto !== null) mostrarPartidos(diaVisto, mesVisto);
@@ -771,6 +769,7 @@
           crucesInfo = {};
           crucesFechaIdx = {};
           var hoy = new Date();
+          // Fase de grupos (pasados)
           for (var i = 0; i <= 40; i++) {
             var d = new Date(2026, 5, 11 + i);
             if (d > hoy) break;
@@ -781,6 +780,18 @@
               .catch(function() {});
             })('' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0'));
           }
+          // Eliminatorias: también futuras, para ver equipos ya programados
+          ['20260628','20260629','20260630','20260701','20260702','20260703','20260704',
+           '20260705','20260706','20260707','20260709','20260710','20260711','20260712',
+           '20260714','20260715','20260718','20260719'].forEach(function(fechaStr) {
+            var fn = parseInt(fechaStr);
+            var fd = new Date(Math.floor(fn/10000), Math.floor((fn%10000)/100)-1, fn%100);
+            if (fd <= hoy) return; // ya cargado en el bucle anterior
+            fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=' + fechaStr + '&limit=50')
+            .then(function(r) { return r.json(); })
+            .then(function(data) { procesarResultadosData(data, fechaStr); })
+            .catch(function() {});
+          });
         }
 
         // ===== DATOS DE GRUPOS =====
@@ -1282,6 +1293,8 @@
         }
 
         function crearBracketCardContent(id) {
+          var match = null;
+          for (var i = 0; i < crucesPartidos.length; i++) { if (crucesPartidos[i].id === id) { match = crucesPartidos[i]; break; } }
           var info = crucesInfo[id];
           var fl1 = info ? info.fl1 : '';
           var eq1 = info ? info.eq1 : '?';
@@ -1305,9 +1318,10 @@
             if (gan === fl1) { wt1 = 'font-weight:900;'; op2 = 'opacity:0.38;'; }
             else             { wt2 = 'font-weight:900;'; op1 = 'opacity:0.38;'; }
           }
-          var r1 = '<div style="display:flex;align-items:center;gap:4px;padding:4px 6px;' + op1 + '">' + flagH(fl1) + '<span style="' + nameBase + wt1 + '">' + eq1 + '</span>' + (g1 !== null ? '<span style="' + scoreBase + '">' + g1 + '</span>' : '') + dotH(fl1) + '</div>';
-          var r2 = '<div style="display:flex;align-items:center;gap:4px;padding:4px 6px;border-top:1px solid #ece3d8;' + op2 + '">' + flagH(fl2) + '<span style="' + nameBase + wt2 + '">' + eq2 + '</span>' + (g2 !== null ? '<span style="' + scoreBase + '">' + g2 + '</span>' : '') + dotH(fl2) + '</div>';
-          return r1 + r2;
+          var dateBar = match ? '<div style="font-size:0.56rem;color:#999;padding:2px 5px;background:#faf6f0;border-bottom:1px solid #ede6da;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + match.fecha + ' · ' + match.hora + '</div>' : '';
+          var r1 = '<div style="display:flex;align-items:center;gap:4px;padding:3px 5px;' + op1 + '">' + flagH(fl1) + '<span style="' + nameBase + wt1 + '">' + eq1 + '</span>' + (g1 !== null ? '<span style="' + scoreBase + '">' + g1 + '</span>' : '') + dotH(fl1) + '</div>';
+          var r2 = '<div style="display:flex;align-items:center;gap:4px;padding:3px 5px;border-top:1px solid #ece3d8;' + op2 + '">' + flagH(fl2) + '<span style="' + nameBase + wt2 + '">' + eq2 + '</span>' + (g2 !== null ? '<span style="' + scoreBase + '">' + g2 + '</span>' : '') + dotH(fl2) + '</div>';
+          return dateBar + r1 + r2;
         }
 
         function actualizarCrucesCard(id) {
@@ -1318,61 +1332,103 @@
         function renderBracketLayout() {
           var wrap = document.getElementById('bracket-wrap');
           if (!wrap) return;
-          var SLOT = 48, CARD_W = 158, GAP = 34, HDR = 26;
-          var rondas = [
-            {id:'d16', label:'16 AVOS', cnt:16},
-            {id:'oct', label:'OCTAVOS', cnt:8},
-            {id:'cua', label:'CUARTOS', cnt:4},
-            {id:'sem', label:'SEMIS',   cnt:2},
-            {id:'fin', label:'FINAL',   cnt:1}
-          ];
-          var totalH = 16 * SLOT;
-          var colX = rondas.map(function(_, ri) { return ri * (CARD_W + GAP); });
-          var totalW = colX[4] + CARD_W;
+          var SLOT = 56, CW = 130, GAP = 18, CU = CW + GAP, HDR = 28;
+          var totalH = 8 * SLOT; // 448px — height for 8 d16 slots per side
+          var colX = [0,1,2,3,4,5,6,7,8].map(function(i){return i*CU;});
+          var totalW = colX[8] + CW;
+          var SV = '#C4A882';
 
-          var html = '<div style="position:relative;width:' + totalW + 'px;height:' + (HDR + totalH + 70) + 'px;">';
+          var html = '<div style="position:relative;width:'+totalW+'px;height:'+(HDR+totalH+80)+'px;">';
 
           // SVG connector lines
-          html += '<svg style="position:absolute;top:' + HDR + 'px;left:0;width:' + totalW + 'px;height:' + totalH + 'px;overflow:visible;" xmlns="http://www.w3.org/2000/svg">';
-          rondas.forEach(function(ronda, ri) {
-            if (ri >= rondas.length - 1) return;
+          html += '<svg style="position:absolute;top:'+HDR+'px;left:0;width:'+totalW+'px;height:'+totalH+'px;overflow:visible;" xmlns="http://www.w3.org/2000/svg">';
+
+          // Left side: col0→col1 (d16→oct), col1→col2 (oct→cua), col2→col3 (cua→sem)
+          [0,1,2].forEach(function(ri) {
             var slotH = SLOT * Math.pow(2, ri);
-            var xR   = colX[ri] + CARD_W;
-            var xL   = colX[ri + 1];
-            var xMid = xR + GAP / 2;
-            for (var pi = 0; pi < ronda.cnt / 2; pi++) {
-              var y1 = pi * 2 * slotH + slotH / 2;
-              var y2 = pi * 2 * slotH + 3 * slotH / 2;
-              var yt = pi * 2 * slotH + slotH; // = pi * nextSlotH + nextSlotH/2
-              html += '<line x1="' + xR + '" y1="' + y1 + '" x2="' + xMid + '" y2="' + y1 + '" stroke="#C4A882" stroke-width="1.5"/>';
-              html += '<line x1="' + xR + '" y1="' + y2 + '" x2="' + xMid + '" y2="' + y2 + '" stroke="#C4A882" stroke-width="1.5"/>';
-              html += '<line x1="' + xMid + '" y1="' + y1 + '" x2="' + xMid + '" y2="' + y2 + '" stroke="#C4A882" stroke-width="1.5"/>';
-              html += '<line x1="' + xMid + '" y1="' + yt + '" x2="' + xL + '" y2="' + yt + '" stroke="#C4A882" stroke-width="1.5"/>';
+            var pairs = 4 / Math.pow(2, ri); // 4, 2, 1
+            var xR = colX[ri]+CW, xL = colX[ri+1], xMid = xR+GAP/2;
+            for (var pi=0; pi<pairs; pi++) {
+              var y1=pi*2*slotH+slotH/2, y2=pi*2*slotH+3*slotH/2, yt=pi*2*slotH+slotH;
+              html+='<line x1="'+xR+'" y1="'+y1+'" x2="'+xMid+'" y2="'+y1+'" stroke="'+SV+'" stroke-width="1.5"/>';
+              html+='<line x1="'+xR+'" y1="'+y2+'" x2="'+xMid+'" y2="'+y2+'" stroke="'+SV+'" stroke-width="1.5"/>';
+              html+='<line x1="'+xMid+'" y1="'+y1+'" x2="'+xMid+'" y2="'+y2+'" stroke="'+SV+'" stroke-width="1.5"/>';
+              html+='<line x1="'+xMid+'" y1="'+yt+'" x2="'+xL+'" y2="'+yt+'" stroke="'+SV+'" stroke-width="1.5"/>';
             }
           });
-          html += '</svg>';
 
-          // Cards
-          rondas.forEach(function(ronda, ri) {
-            var slotH = SLOT * Math.pow(2, ri);
-            var matches = crucesPartidos.filter(function(m) { return m.ronda === ronda.id; });
-            html += '<div style="position:absolute;top:0;left:' + colX[ri] + 'px;width:' + CARD_W + 'px;height:' + HDR + 'px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;color:' + crucesRondaColores[ronda.id] + ';letter-spacing:1.5px;">' + ronda.label + '</div>';
-            matches.forEach(function(match, mi) {
-              var slotTop = HDR + mi * slotH;
-              html += '<div style="position:absolute;top:' + slotTop + 'px;left:' + colX[ri] + 'px;width:' + CARD_W + 'px;height:' + slotH + 'px;display:flex;align-items:center;">'
-                + '<div id="cruce-card-' + match.id + '" class="cruce-card" style="width:100%;">' + crearBracketCardContent(match.id) + '</div>'
-                + '</div>';
+          // sem-1 → fin (horizontal at mid height)
+          var midY = totalH/2;
+          html+='<line x1="'+(colX[3]+CW)+'" y1="'+midY+'" x2="'+colX[4]+'" y2="'+midY+'" stroke="'+SV+'" stroke-width="1.5"/>';
+
+          // Right side: col8→col7 (d16→oct), col7→col6 (oct→cua), col6→col5 (cua→sem)
+          [8,7,6].forEach(function(ri, idx) {
+            var slotH = SLOT * Math.pow(2, idx);
+            var pairs = 4 / Math.pow(2, idx);
+            var xL = colX[ri], xR = colX[ri-1]+CW, xMid = xR+GAP/2;
+            for (var pi=0; pi<pairs; pi++) {
+              var y1=pi*2*slotH+slotH/2, y2=pi*2*slotH+3*slotH/2, yt=pi*2*slotH+slotH;
+              html+='<line x1="'+xL+'" y1="'+y1+'" x2="'+xMid+'" y2="'+y1+'" stroke="'+SV+'" stroke-width="1.5"/>';
+              html+='<line x1="'+xL+'" y1="'+y2+'" x2="'+xMid+'" y2="'+y2+'" stroke="'+SV+'" stroke-width="1.5"/>';
+              html+='<line x1="'+xMid+'" y1="'+y1+'" x2="'+xMid+'" y2="'+y2+'" stroke="'+SV+'" stroke-width="1.5"/>';
+              html+='<line x1="'+xMid+'" y1="'+yt+'" x2="'+xR+'" y2="'+yt+'" stroke="'+SV+'" stroke-width="1.5"/>';
+            }
+          });
+
+          // sem-2 → fin
+          html+='<line x1="'+colX[5]+'" y1="'+midY+'" x2="'+(colX[4]+CW)+'" y2="'+midY+'" stroke="'+SV+'" stroke-width="1.5"/>';
+
+          html+='</svg>';
+
+          // Round labels
+          [{ci:0,l:'16 AVOS',r:'d16'},{ci:1,l:'OCTAVOS',r:'oct'},{ci:2,l:'CUARTOS',r:'cua'},{ci:3,l:'SEMIS',r:'sem'},
+           {ci:4,l:'FINAL',r:'fin'},
+           {ci:5,l:'SEMIS',r:'sem'},{ci:6,l:'CUARTOS',r:'cua'},{ci:7,l:'OCTAVOS',r:'oct'},{ci:8,l:'16 AVOS',r:'d16'}
+          ].forEach(function(c){
+            html+='<div style="position:absolute;top:0;left:'+colX[c.ci]+'px;width:'+CW+'px;height:'+HDR+'px;display:flex;align-items:center;justify-content:center;font-size:0.54rem;font-weight:800;color:'+crucesRondaColores[c.r]+';letter-spacing:1.2px;">'+c.l+'</div>';
+          });
+
+          // Left side cards
+          [{ci:0,ids:['d16-1','d16-2','d16-3','d16-4','d16-5','d16-6','d16-7','d16-8']},
+           {ci:1,ids:['oct-1','oct-2','oct-3','oct-4']},
+           {ci:2,ids:['cua-1','cua-2']},
+           {ci:3,ids:['sem-1']}
+          ].forEach(function(col){
+            var slotH = totalH/col.ids.length;
+            col.ids.forEach(function(mid,mi){
+              html+='<div style="position:absolute;top:'+(HDR+mi*slotH)+'px;left:'+colX[col.ci]+'px;width:'+CW+'px;height:'+slotH+'px;display:flex;align-items:center;">'
+                +'<div id="cruce-card-'+mid+'" class="cruce-card" style="width:100%;">'+crearBracketCardContent(mid)+'</div>'
+                +'</div>';
             });
           });
 
-          // Tercer puesto below
-          var terTop = HDR + totalH + 16;
-          html += '<div style="position:absolute;top:' + terTop + 'px;left:0;width:' + CARD_W + 'px;">'
-            + '<div style="font-size:0.58rem;font-weight:800;color:#888;letter-spacing:1px;text-align:center;margin-bottom:4px;">3ER Y 4º PUESTO · SÁB 18 JUL</div>'
-            + '<div id="cruce-card-ter-1" class="cruce-card">' + crearBracketCardContent('ter-1') + '</div>'
-            + '</div>';
+          // Final (center column)
+          html+='<div style="position:absolute;top:'+HDR+'px;left:'+colX[4]+'px;width:'+CW+'px;height:'+totalH+'px;display:flex;align-items:center;">'
+            +'<div id="cruce-card-fin-1" class="cruce-card" style="width:100%;">'+crearBracketCardContent('fin-1')+'</div>'
+            +'</div>';
 
-          html += '</div>';
+          // Right side cards
+          [{ci:5,ids:['sem-2']},
+           {ci:6,ids:['cua-3','cua-4']},
+           {ci:7,ids:['oct-5','oct-6','oct-7','oct-8']},
+           {ci:8,ids:['d16-9','d16-10','d16-11','d16-12','d16-13','d16-14','d16-15','d16-16']}
+          ].forEach(function(col){
+            var slotH = totalH/col.ids.length;
+            col.ids.forEach(function(mid,mi){
+              html+='<div style="position:absolute;top:'+(HDR+mi*slotH)+'px;left:'+colX[col.ci]+'px;width:'+CW+'px;height:'+slotH+'px;display:flex;align-items:center;">'
+                +'<div id="cruce-card-'+mid+'" class="cruce-card" style="width:100%;">'+crearBracketCardContent(mid)+'</div>'
+                +'</div>';
+            });
+          });
+
+          // 3rd place match below the final
+          var terTop = HDR + totalH + 16;
+          html+='<div style="position:absolute;top:'+terTop+'px;left:'+colX[4]+'px;width:'+CW+'px;">'
+            +'<div style="font-size:0.54rem;font-weight:800;color:#888;letter-spacing:1px;text-align:center;margin-bottom:4px;">3ER PUESTO</div>'
+            +'<div id="cruce-card-ter-1" class="cruce-card">'+crearBracketCardContent('ter-1')+'</div>'
+            +'</div>';
+
+          html+='</div>';
           wrap.innerHTML = html;
         }
 
@@ -1385,8 +1441,10 @@
           if (idx >= slots.length) return;
           var id = slots[idx];
           crucesFechaIdx[slotKey]++;
-          crucesInfo[id] = {fl1:flHome, eq1:buscarNombrePorFl(flHome), g1:gH, fl2:flAway, eq2:buscarNombrePorFl(flAway), g2:gA, gan:flGanador};
-          actualizarCrucesCard(id);
+          if (flHome || flAway || gH !== null) {
+            crucesInfo[id] = {fl1:flHome||'', eq1:flHome?buscarNombrePorFl(flHome):'Por determinar', g1:gH, fl2:flAway||'', eq2:flAway?buscarNombrePorFl(flAway):'Por determinar', g2:gA, gan:flGanador||''};
+            actualizarCrucesCard(id);
+          }
         }
 
         function mostrarSubTab(sub) {
