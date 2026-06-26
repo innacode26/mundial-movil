@@ -386,13 +386,16 @@
     <button class="activo" onclick="mostrarTab('grupos')">⚽ Grupos</button>
     <button onclick="mostrarTab('calendario')">📅 Calendario</button>
     <button onclick="mostrarTab('quiniela')">🏆 Quiniela</button>
-    <button onclick="mostrarTab('cruces')">🗓️ Cuadro Final</button>
   </nav>
 
   <main>
 
     <section id="grupos" class="seccion" style="max-width:none;">
-      <div style="display:flex; gap:20px; align-items:flex-start;">
+      <div class="sub-tabs" id="grupos-sub-tabs">
+        <button class="activo" onclick="mostrarSubGrupos('grupos')">Grupos</button>
+        <button onclick="mostrarSubGrupos('cruces')">Cuadro Final</button>
+      </div>
+      <div id="panel-grupos-wrap" style="display:flex; gap:20px; align-items:flex-start;">
       <div id="panel-grupos" class="grupos-grid" style="flex-shrink:0; width:min(1060px, calc(100vw - 40px));">
 
         <div class="grupo-card" id="grupo-A">
@@ -1219,28 +1222,53 @@
         function mostrarTab(tab) {
           var secGrupos = document.getElementById('grupos');
           var panelGrupos = document.getElementById('panel-grupos');
+          var panelGruposWrap = document.getElementById('panel-grupos-wrap');
           var panelCal = document.getElementById('panel-calendario');
+          var panelCruces = document.getElementById('panel-cruces');
           var secQuiniela = document.getElementById('quiniela');
-          var secCruces = document.getElementById('cruces');
           secGrupos.classList.add('oculto');
           secQuiniela.classList.add('oculto');
-          secCruces.classList.add('oculto');
           if (tab === 'grupos') {
             secGrupos.classList.remove('oculto');
-            panelGrupos.classList.remove('oculto');
+            panelGruposWrap.classList.remove('oculto');
+            panelCruces.classList.add('oculto');
             panelCal.classList.add('oculto');
+            panelGrupos.classList.remove('oculto');
+            document.querySelectorAll('#grupos-sub-tabs button').forEach(function(b){b.classList.remove('activo');});
+            document.querySelectorAll('#grupos-sub-tabs button')[0].classList.add('activo');
           } else if (tab === 'calendario') {
             secGrupos.classList.remove('oculto');
-            panelGrupos.classList.add('oculto');
+            panelGruposWrap.classList.remove('oculto');
+            panelCruces.classList.add('oculto');
             panelCal.classList.remove('oculto');
+            panelGrupos.classList.add('oculto');
+            document.querySelectorAll('#grupos-sub-tabs button').forEach(function(b){b.classList.remove('activo');});
           } else if (tab === 'quiniela') {
             secQuiniela.classList.remove('oculto');
-          } else if (tab === 'cruces') {
-            secCruces.classList.remove('oculto');
           }
           document.querySelectorAll('.nav-tabs button').forEach(function(b) { b.classList.remove('activo'); });
-          var tabIdx = ['grupos','calendario','quiniela','cruces'].indexOf(tab);
+          var tabIdx = ['grupos','calendario','quiniela'].indexOf(tab);
           document.querySelectorAll('.nav-tabs button')[tabIdx >= 0 ? tabIdx : 0].classList.add('activo');
+        }
+
+        function mostrarSubGrupos(sub) {
+          var panelGruposWrap = document.getElementById('panel-grupos-wrap');
+          var panelGrupos = document.getElementById('panel-grupos');
+          var panelCal = document.getElementById('panel-calendario');
+          var panelCruces = document.getElementById('panel-cruces');
+          if (sub === 'grupos') {
+            panelGruposWrap.classList.remove('oculto');
+            panelGrupos.classList.remove('oculto');
+            panelCal.classList.add('oculto');
+            panelCruces.classList.add('oculto');
+            document.querySelectorAll('.nav-tabs button').forEach(function(b){b.classList.remove('activo');});
+            document.querySelectorAll('.nav-tabs button')[0].classList.add('activo');
+          } else {
+            panelGruposWrap.classList.add('oculto');
+            panelCruces.classList.remove('oculto');
+          }
+          document.querySelectorAll('#grupos-sub-tabs button').forEach(function(b){b.classList.remove('activo');});
+          document.querySelectorAll('#grupos-sub-tabs button')[sub === 'grupos' ? 0 : 1].classList.add('activo');
         }
 
         function buscarNombrePorFl(fl) {
@@ -1459,7 +1487,14 @@
         }
 
       </script>
-      </div><!-- fin flex -->
+      </div><!-- fin panel-grupos-wrap -->
+
+      <div id="panel-cruces" class="oculto" style="margin:0 -20px;padding:0;">
+        <div class="bracket-scroll">
+          <div id="bracket-wrap"></div>
+        </div>
+      </div>
+
     </section>
 
 
@@ -1567,12 +1602,6 @@
       </div>
 
       </div><!-- fin panel-clasificacion -->
-    </section>
-
-    <section id="cruces" class="seccion oculto" style="max-width:none;padding-left:0;padding-right:0;">
-      <div class="bracket-scroll">
-        <div id="bracket-wrap"></div>
-      </div>
     </section>
 
   </main>
