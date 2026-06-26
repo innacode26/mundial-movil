@@ -348,6 +348,35 @@
     }
 
     footer span { color: var(--dorado); }
+
+    /* CUADRO FINAL */
+    .cruces-nav {
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .cruces-nav::-webkit-scrollbar { display: none; }
+    .cruces-nav button { white-space: nowrap; }
+
+    .cruces-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px 0;
+    }
+
+    .cruce-card {
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #D4B896;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 500px) {
+      .cruces-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -368,6 +397,7 @@
     <button class="activo" onclick="mostrarTab('grupos')">⚽ Grupos</button>
     <button onclick="mostrarTab('calendario')">📅 Calendario</button>
     <button onclick="mostrarTab('quiniela')">🏆 Quiniela</button>
+    <button onclick="mostrarTab('cruces')">🗓️ Cuadro Final</button>
   </nav>
 
   <main>
@@ -724,15 +754,22 @@
               huboNuevos = true;
               // Detectar victoria en eliminatoria
               var ptsRonda = rondasKnockout[fechaNum] || 0;
+              var eventDate = new Date(event.date || 0);
+              var utcHour = eventDate.getUTCHours();
               if (fechaNum === 20260704) {
                 // El 4 jul hay 16avos (03:00 CEST=01:00 UTC) y octavos (19:00 CEST=17:00 UTC)
-                var eventDate = new Date(event.date || 0);
-                ptsRonda = eventDate.getUTCHours() < 12 ? 4 : 5;
+                ptsRonda = utcHour < 12 ? 4 : 5;
               }
               if (ptsRonda > 0 && gH !== gA) {
                 var flGanador = gH > gA ? flHome : flAway;
                 vicKnockout[flGanador] = (vicKnockout[flGanador] || 0) + ptsRonda;
                 huboKnockout = true;
+                registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador);
+              }
+              // Partido por el tercer puesto (no da pts quiniela pero se registra en el cuadro)
+              if (ptsRonda === 0 && fechaNum === 20260718 && gH !== gA) {
+                var flGanador3 = gH > gA ? flHome : flAway;
+                registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador3);
               }
             }
           });
@@ -742,6 +779,8 @@
 
         function cargarResultados() {
           vicKnockout = {};
+          crucesInfo = {};
+          crucesFechaIdx = {};
           var hoy = new Date();
           for (var i = 0; i <= 40; i++) {
             var d = new Date(2026, 5, 11 + i);
@@ -809,6 +848,71 @@
         };
         // fl -> pts acumulados en eliminatorias (se recalcula en cada carga)
         var vicKnockout = {};
+        var crucesInfo = {};
+        var crucesFechaIdx = {};
+
+        var crucesRondaColores = {
+          d16:'rgba(220,120,0,0.92)', oct:'rgba(200,50,30,0.92)',
+          cua:'rgba(160,0,80,0.92)', sem:'rgba(100,0,160,0.92)',
+          ter:'rgba(80,80,80,0.92)', fin:'#C8A215'
+        };
+
+        var crucesPartidos = [
+          {id:'d16-1', ronda:'d16',n:1, fecha:'Jue 28 Jun',hora:'21:00'},
+          {id:'d16-2', ronda:'d16',n:2, fecha:'Vie 29 Jun',hora:'19:00'},
+          {id:'d16-3', ronda:'d16',n:3, fecha:'Vie 29 Jun',hora:'22:30'},
+          {id:'d16-4', ronda:'d16',n:4, fecha:'Sáb 30 Jun',hora:'03:00'},
+          {id:'d16-5', ronda:'d16',n:5, fecha:'Sáb 30 Jun',hora:'19:00'},
+          {id:'d16-6', ronda:'d16',n:6, fecha:'Sáb 30 Jun',hora:'23:00'},
+          {id:'d16-7', ronda:'d16',n:7, fecha:'Mié 1 Jul', hora:'03:00'},
+          {id:'d16-8', ronda:'d16',n:8, fecha:'Mié 1 Jul', hora:'18:00'},
+          {id:'d16-9', ronda:'d16',n:9, fecha:'Mié 1 Jul', hora:'22:00'},
+          {id:'d16-10',ronda:'d16',n:10,fecha:'Jue 2 Jul', hora:'03:00'},
+          {id:'d16-11',ronda:'d16',n:11,fecha:'Jue 2 Jul', hora:'21:00'},
+          {id:'d16-12',ronda:'d16',n:12,fecha:'Vie 3 Jul', hora:'19:00'},
+          {id:'d16-13',ronda:'d16',n:13,fecha:'Vie 3 Jul', hora:'22:00'},
+          {id:'d16-14',ronda:'d16',n:14,fecha:'Vie 3 Jul', hora:'23:00'},
+          {id:'d16-15',ronda:'d16',n:15,fecha:'Sáb 4 Jul', hora:'03:00'},
+          {id:'d16-16',ronda:'d16',n:16,fecha:'Sáb 4 Jul', hora:'03:30'},
+          {id:'oct-1', ronda:'oct',n:1, fecha:'Sáb 4 Jul', hora:'19:00'},
+          {id:'oct-2', ronda:'oct',n:2, fecha:'Sáb 4 Jul', hora:'23:00'},
+          {id:'oct-3', ronda:'oct',n:3, fecha:'Dom 5 Jul', hora:'22:00'},
+          {id:'oct-4', ronda:'oct',n:4, fecha:'Lun 6 Jul', hora:'02:00'},
+          {id:'oct-5', ronda:'oct',n:5, fecha:'Lun 6 Jul', hora:'21:00'},
+          {id:'oct-6', ronda:'oct',n:6, fecha:'Mar 7 Jul', hora:'03:00'},
+          {id:'oct-7', ronda:'oct',n:7, fecha:'Mar 7 Jul', hora:'18:00'},
+          {id:'oct-8', ronda:'oct',n:8, fecha:'Mar 7 Jul', hora:'22:00'},
+          {id:'cua-1', ronda:'cua',n:1, fecha:'Jue 9 Jul', hora:'22:00'},
+          {id:'cua-2', ronda:'cua',n:2, fecha:'Vie 10 Jul',hora:'21:00'},
+          {id:'cua-3', ronda:'cua',n:3, fecha:'Sáb 11 Jul',hora:'23:00'},
+          {id:'cua-4', ronda:'cua',n:4, fecha:'Dom 12 Jul',hora:'03:00'},
+          {id:'sem-1', ronda:'sem',n:1, fecha:'Mar 14 Jul',hora:'21:00'},
+          {id:'sem-2', ronda:'sem',n:2, fecha:'Mié 15 Jul',hora:'21:00'},
+          {id:'ter-1', ronda:'ter',n:1, fecha:'Sáb 18 Jul',hora:'23:00'},
+          {id:'fin-1', ronda:'fin',n:1, fecha:'Dom 19 Jul',hora:'21:00'}
+        ];
+
+        var crucesSlotsPorFecha = {
+          20260628:['d16-1'],
+          20260629:['d16-2','d16-3'],
+          20260630:['d16-4','d16-5','d16-6'],
+          20260701:['d16-7','d16-8','d16-9'],
+          20260702:['d16-10','d16-11'],
+          20260703:['d16-12','d16-13','d16-14'],
+          '20260704-d16':['d16-15','d16-16'],
+          '20260704-oct':['oct-1','oct-2'],
+          20260705:['oct-3'],
+          20260706:['oct-4','oct-5'],
+          20260707:['oct-6','oct-7','oct-8'],
+          20260709:['cua-1'],
+          20260710:['cua-2'],
+          20260711:['cua-3'],
+          20260712:['cua-4'],
+          20260714:['sem-1'],
+          20260715:['sem-2'],
+          20260718:['ter-1'],
+          20260719:['fin-1']
+        };
 
         var standingsAPI = {};
         var paisesEliminados = {};
@@ -907,6 +1011,16 @@
           }
           actualizarPuntosQuiniela();
           renderRankingQuiniela();
+          renderCruces();
+          // Auto-seleccionar la ronda activa según la fecha
+          var hoy = new Date();
+          var hoyNum = parseInt('' + hoy.getFullYear() + String(hoy.getMonth()+1).padStart(2,'0') + String(hoy.getDate()).padStart(2,'0'));
+          var autoRonda = 'd16';
+          if (hoyNum >= 20260705 && hoyNum <= 20260707) autoRonda = 'oct';
+          else if (hoyNum >= 20260709 && hoyNum <= 20260712) autoRonda = 'cua';
+          else if (hoyNum >= 20260714 && hoyNum <= 20260715) autoRonda = 'sem';
+          else if (hoyNum >= 20260718) autoRonda = 'fin';
+          mostrarRonda(autoRonda);
         });
 
         // ===== ACTUALIZAR ELIMINADOS EN QUINIELA =====
@@ -1116,8 +1230,10 @@
           var panelGrupos = document.getElementById('panel-grupos');
           var panelCal = document.getElementById('panel-calendario');
           var secQuiniela = document.getElementById('quiniela');
+          var secCruces = document.getElementById('cruces');
           secGrupos.classList.add('oculto');
           secQuiniela.classList.add('oculto');
+          secCruces.classList.add('oculto');
           if (tab === 'grupos') {
             secGrupos.classList.remove('oculto');
             panelGrupos.classList.remove('oculto');
@@ -1128,10 +1244,110 @@
             panelCal.classList.remove('oculto');
           } else if (tab === 'quiniela') {
             secQuiniela.classList.remove('oculto');
+          } else if (tab === 'cruces') {
+            secCruces.classList.remove('oculto');
           }
           document.querySelectorAll('.nav-tabs button').forEach(function(b) { b.classList.remove('activo'); });
-          var idx = tab === 'grupos' ? 0 : tab === 'calendario' ? 1 : 2;
-          document.querySelectorAll('.nav-tabs button')[idx].classList.add('activo');
+          var tabIdx = ['grupos','calendario','quiniela','cruces'].indexOf(tab);
+          document.querySelectorAll('.nav-tabs button')[tabIdx >= 0 ? tabIdx : 0].classList.add('activo');
+        }
+
+        function buscarNombrePorFl(fl) {
+          if (!fl) return 'Por determinar';
+          var found = null;
+          Object.keys(gruposData).forEach(function(g) {
+            gruposData[g].forEach(function(t) { if (t.fl === fl) found = t.n; });
+          });
+          return found || fl;
+        }
+
+        function crearCruceCardContent(id) {
+          var match = null;
+          for (var i = 0; i < crucesPartidos.length; i++) {
+            if (crucesPartidos[i].id === id) { match = crucesPartidos[i]; break; }
+          }
+          if (!match) return '';
+          var info = crucesInfo[id];
+          var color = crucesRondaColores[match.ronda] || '#888';
+          var fl1 = info ? info.fl1 : '';
+          var eq1 = info ? info.eq1 : 'Por determinar';
+          var fl2 = info ? info.fl2 : '';
+          var eq2 = info ? info.eq2 : 'Por determinar';
+          var g1  = (info && info.g1 !== undefined) ? info.g1 : null;
+          var g2  = (info && info.g2 !== undefined) ? info.g2 : null;
+          var gan = info ? info.gan : '';
+          var flagHtml = function(fl) {
+            return fl
+              ? '<img src="https://flagcdn.com/w40/' + fl + '.png" style="width:26px;height:auto;border-radius:2px;flex-shrink:0;">'
+              : '<span style="display:inline-block;width:26px;height:18px;background:#e0e0e0;border-radius:2px;flex-shrink:0;"></span>';
+          };
+          var dotHtml = function(fl) {
+            var c = colorPorEquipo[fl];
+            return c ? '<span style="width:8px;height:8px;border-radius:50%;background:' + c.hex + ';margin-left:auto;flex-shrink:0;display:inline-block;"></span>' : '';
+          };
+          var st1 = gan ? (gan === fl1 ? 'font-weight:900;' : 'opacity:0.38;text-decoration:line-through;') : '';
+          var st2 = gan ? (gan === fl2 ? 'font-weight:900;' : 'opacity:0.38;text-decoration:line-through;') : '';
+          var midHtml = (g1 !== null && g2 !== null)
+            ? '<div style="text-align:center;font-size:1.05rem;font-weight:900;color:var(--azul);padding:2px 0;letter-spacing:3px;">' + g1 + ' - ' + g2 + '</div>'
+            : '<div style="text-align:center;font-size:0.7rem;color:#bbb;font-weight:700;padding:2px 0;">VS</div>';
+          return '<div style="background:' + color + ';padding:6px 10px;display:flex;justify-content:space-between;align-items:center;">'
+            + '<span style="font-size:0.67rem;font-weight:700;color:#fff;letter-spacing:1px;">Partido ' + match.n + '</span>'
+            + '<span style="font-size:0.63rem;color:rgba(255,255,255,0.88);">' + match.fecha + ' · ' + match.hora + '</span>'
+            + '</div>'
+            + '<div style="padding:9px 12px;">'
+            + '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;' + st1 + '">' + flagHtml(fl1) + '<span style="font-size:0.84rem;color:#000;">' + eq1 + '</span>' + dotHtml(fl1) + '</div>'
+            + midHtml
+            + '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;' + st2 + '">' + flagHtml(fl2) + '<span style="font-size:0.84rem;color:#000;">' + eq2 + '</span>' + dotHtml(fl2) + '</div>'
+            + '</div>';
+        }
+
+        function actualizarCrucesCard(id) {
+          var card = document.getElementById('cruce-card-' + id);
+          if (card) card.innerHTML = crearCruceCardContent(id);
+        }
+
+        function renderCruces() {
+          ['d16','oct','cua','sem'].forEach(function(ronda) {
+            var panel = document.getElementById('panel-cruces-' + ronda);
+            if (!panel) return;
+            var html = '';
+            crucesPartidos.forEach(function(m) {
+              if (m.ronda === ronda) html += '<div id="cruce-card-' + m.id + '" class="cruce-card">' + crearCruceCardContent(m.id) + '</div>';
+            });
+            panel.innerHTML = html;
+          });
+          var panelFin = document.getElementById('panel-cruces-fin');
+          if (panelFin) {
+            var html = '<div style="font-size:0.78rem;font-weight:700;color:#666;text-align:center;margin-bottom:10px;letter-spacing:2px;text-transform:uppercase;">3er y 4º Puesto · Sáb 18 Jul</div>'
+              + '<div id="cruce-card-ter-1" class="cruce-card" style="margin-bottom:24px;max-width:420px;margin-left:auto;margin-right:auto;">' + crearCruceCardContent('ter-1') + '</div>'
+              + '<div style="font-size:0.92rem;font-weight:900;color:var(--dorado);text-align:center;margin-bottom:10px;letter-spacing:3px;text-transform:uppercase;">⭐ Final Mundial · Dom 19 Jul ⭐</div>'
+              + '<div id="cruce-card-fin-1" class="cruce-card" style="max-width:420px;margin-left:auto;margin-right:auto;">' + crearCruceCardContent('fin-1') + '</div>';
+            panelFin.innerHTML = html;
+          }
+        }
+
+        function registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador) {
+          var slotKey = fechaNum === 20260704 ? ('20260704-' + (utcHour < 12 ? 'd16' : 'oct')) : fechaNum;
+          var slots = crucesSlotsPorFecha[slotKey];
+          if (!slots) return;
+          if (crucesFechaIdx[slotKey] === undefined) crucesFechaIdx[slotKey] = 0;
+          var idx = crucesFechaIdx[slotKey];
+          if (idx >= slots.length) return;
+          var id = slots[idx];
+          crucesFechaIdx[slotKey]++;
+          crucesInfo[id] = {fl1:flHome, eq1:buscarNombrePorFl(flHome), g1:gH, fl2:flAway, eq2:buscarNombrePorFl(flAway), g2:gA, gan:flGanador};
+          actualizarCrucesCard(id);
+        }
+
+        function mostrarRonda(ronda) {
+          ['d16','oct','cua','sem','fin'].forEach(function(r) {
+            document.getElementById('panel-cruces-' + r).classList.add('oculto');
+          });
+          document.getElementById('panel-cruces-' + ronda).classList.remove('oculto');
+          var btns = document.querySelectorAll('#cruces-nav-tabs button');
+          btns.forEach(function(b) { b.classList.remove('activo'); });
+          var idx = ['d16','oct','cua','sem','fin'].indexOf(ronda);
+          if (idx >= 0) btns[idx].classList.add('activo');
         }
 
         function mostrarSubTab(sub) {
@@ -1141,8 +1357,8 @@
           panelClas.classList.add('oculto');
           if (sub === 'equipos') panelEq.classList.remove('oculto');
           else panelClas.classList.remove('oculto');
-          document.querySelectorAll('.sub-tabs button').forEach(function(b) { b.classList.remove('activo'); });
-          document.querySelectorAll('.sub-tabs button')[sub === 'equipos' ? 0 : 1].classList.add('activo');
+          document.querySelectorAll('#quiniela .sub-tabs button').forEach(function(b) { b.classList.remove('activo'); });
+          document.querySelectorAll('#quiniela .sub-tabs button')[sub === 'equipos' ? 0 : 1].classList.add('activo');
         }
 
       </script>
@@ -1254,6 +1470,21 @@
       </div>
 
       </div><!-- fin panel-clasificacion -->
+    </section>
+
+    <section id="cruces" class="seccion oculto" style="max-width:none;">
+      <div class="sub-tabs cruces-nav" id="cruces-nav-tabs">
+        <button class="activo" onclick="mostrarRonda('d16')">16avos</button>
+        <button onclick="mostrarRonda('oct')">Octavos</button>
+        <button onclick="mostrarRonda('cua')">Cuartos</button>
+        <button onclick="mostrarRonda('sem')">Semis</button>
+        <button onclick="mostrarRonda('fin')">Final</button>
+      </div>
+      <div id="panel-cruces-d16" class="cruces-grid"></div>
+      <div id="panel-cruces-oct" class="cruces-grid oculto"></div>
+      <div id="panel-cruces-cua" class="cruces-grid oculto"></div>
+      <div id="panel-cruces-sem" class="cruces-grid oculto"></div>
+      <div id="panel-cruces-fin" class="oculto" style="padding:16px 0;"></div>
     </section>
 
   </main>
