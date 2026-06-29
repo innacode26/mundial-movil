@@ -749,6 +749,24 @@
           return found;
         }
 
+        var _diasES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+        var _mesesES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+        function formatearHoraEspana(date) {
+          // UTC+2 en verano
+          var esp = new Date(date.getTime() + 2*3600*1000);
+          var h = esp.getUTCHours(), m = esp.getUTCMinutes();
+          return (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+        }
+
+        function formatearFechaEspana(date) {
+          var esp = new Date(date.getTime() + 2*3600*1000);
+          var dia = _diasES[esp.getUTCDay()];
+          var num = esp.getUTCDate();
+          var mes = _mesesES[esp.getUTCMonth()];
+          return dia+' '+num+' '+mes;
+        }
+
         function procesarResultadosData(data, fecha) {
           if (!data.events) return;
           var huboNuevos = false;
@@ -785,11 +803,11 @@
                   vicKnockout[flGanador] = (vicKnockout[flGanador] || 0) + ptsRonda;
                   huboKnockout = true;
                 }
-                registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador);
+                registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador, eventDate);
               }
             } else if (esKnockout && !isFinal) {
               // Partido programado: registrar equipos aunque no se haya jugado
-              registrarResultadoCruce(fechaNum, utcHour, flHome || null, null, flAway || null, null, '');
+              registrarResultadoCruce(fechaNum, utcHour, flHome || null, null, flAway || null, null, '', eventDate);
             }
           });
           if (huboNuevos && diaVisto !== null) mostrarPartidos(diaVisto, mesVisto);
@@ -1516,7 +1534,7 @@
           wrap.innerHTML = html;
         }
 
-        function registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador) {
+        function registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador, eventDate) {
           var slotKey = fechaNum === 20260704 ? ('20260704-' + (utcHour < 12 ? 'd16' : 'oct')) : fechaNum;
           var slots = crucesSlotsPorFecha[slotKey];
           if (!slots) return;
@@ -1529,6 +1547,15 @@
             var eq1 = flHome ? buscarNombrePorFl(flHome) : 'Por determinar';
             var eq2 = flAway ? buscarNombrePorFl(flAway) : 'Por determinar';
             crucesInfo[id] = {fl1:flHome||'', eq1:eq1, g1:gH, fl2:flAway||'', eq2:eq2, g2:gA, gan:flGanador||''};
+            if (eventDate) {
+              for (var ci = 0; ci < crucesPartidos.length; ci++) {
+                if (crucesPartidos[ci].id === id) {
+                  crucesPartidos[ci].hora = formatearHoraEspana(eventDate);
+                  crucesPartidos[ci].fecha = formatearFechaEspana(eventDate);
+                  break;
+                }
+              }
+            }
             actualizarCrucesCard(id);
             // Sincronizar con el calendario
             var ap = crucesAPartidos[id];
