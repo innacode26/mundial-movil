@@ -745,8 +745,8 @@
             var home = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'home'; });
             var away = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'away'; });
             if (!home || !away) return;
-            var flHome = buscarFl(home.team.displayName);
-            var flAway = buscarFl(away.team.displayName);
+            var flHome = idAPI[home.team.id] || buscarFl(home.team.displayName);
+            var flAway = idAPI[away.team.id] || buscarFl(away.team.displayName);
             var eventDate = new Date(event.date || 0);
             var utcHour = eventDate.getUTCHours();
             var ptsRonda = rondasKnockout[fechaNum] || 0;
@@ -868,6 +868,7 @@
         var vicKnockout = {};
         var crucesInfo = {};
         var crucesFechaIdx = {};
+        var idAPI = {}; // ESPN team ID → flag code
 
         var crucesRondaColores = {
           d16:'rgba(220,120,0,0.92)', oct:'rgba(200,50,30,0.92)',
@@ -1183,7 +1184,8 @@
               if (!group.standings || !group.standings.entries) return;
               standingsAPI[letra] = group.standings.entries.map(function(entry) {
                 var apiName = entry.team.displayName || entry.team.location || '';
-                var fl = buscarFl(apiName);
+                var teamId = entry.team.id || '';
+                var fl = idAPI[teamId] || buscarFl(apiName);
                 var matched = null;
                 if (gruposData[letra]) {
                   // exact match first
@@ -1198,6 +1200,7 @@
                   }
                 }
                 if (!fl && matched) fl = matched.fl;
+                if (teamId && fl) idAPI[teamId] = fl;
                 var stats = {};
                 (entry.stats || []).forEach(function(s) { stats[s.name] = s.value || 0; });
                 return {
