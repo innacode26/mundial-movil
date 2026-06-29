@@ -702,7 +702,7 @@
           'es':['Spain'],'cv':['Cape Verde'],'sa':['Saudi Arabia'],'uy':['Uruguay'],
           'fr':['France'],'sn':['Senegal'],'iq':['Iraq'],'no':['Norway'],
           'ar':['Argentina'],'at':['Austria'],'jo':['Jordan'],'dz':['Algeria'],
-          'pt':['Portugal'],'co':['Colombia'],'uz':['Uzbekistan'],'cd':['DR Congo','Congo DR','Democratic Republic of Congo'],
+          'pt':['Portugal'],'co':['Colombia'],'uz':['Uzbekistan'],'cd':['DR Congo','Congo DR','Democratic Republic of Congo','Democratic Republic of the Congo','Congo, DR','Congo (DR)'],
           'gb-eng':['England'],'hr':['Croatia'],'gh':['Ghana'],'pa':['Panama']
         };
         function esPartidoDeGrupos(flHome, flAway) {
@@ -1503,8 +1503,8 @@
           var idx = crucesFechaIdx[slotKey];
           if (idx >= slots.length) return;
           var id = slots[idx];
-          crucesFechaIdx[slotKey]++;
           if (flHome || flAway || gH !== null) {
+            crucesFechaIdx[slotKey]++;
             var eq1 = flHome ? buscarNombrePorFl(flHome) : 'Por determinar';
             var eq2 = flAway ? buscarNombrePorFl(flAway) : 'Por determinar';
             crucesInfo[id] = {fl1:flHome||'', eq1:eq1, g1:gH, fl2:flAway||'', eq2:eq2, g2:gA, gan:flGanador||''};
