@@ -829,6 +829,8 @@
                 if (ptsRonda > 0 && gH !== gA) {
                   vicKnockout[flGanador] = (vicKnockout[flGanador] || 0) + ptsRonda;
                   huboKnockout = true;
+                  var flPerdedor = flGanador === flHome ? flAway : flHome;
+                  if (flPerdedor) paisesEliminados[flPerdedor] = true;
                 }
                 registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador, eventDate);
               }
@@ -838,7 +840,11 @@
             }
           });
           if (huboNuevos && diaVisto !== null) mostrarPartidos(diaVisto, mesVisto);
-          if (huboKnockout) renderRankingQuiniela();
+          if (huboKnockout) {
+            renderRankingQuiniela();
+            actualizarPuntosQuiniela();
+            actualizarEliminadosEnPagina();
+          }
         }
 
         function cargarResultados() {
@@ -1079,6 +1085,9 @@
             standingsAPI[letra].forEach(function(team) {
               if (team.fl) ptsEquipo[team.fl] = team.pts;
             });
+          });
+          Object.keys(vicKnockout).forEach(function(fl) {
+            ptsEquipo[fl] = (ptsEquipo[fl] || 0) + vicKnockout[fl];
           });
           document.querySelectorAll('[data-fl]').forEach(function(li) {
             var fl = li.getAttribute('data-fl');
