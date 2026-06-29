@@ -1218,8 +1218,9 @@
             actualizarEliminadosEnPagina();
             actualizarPuntosQuiniela();
             renderRankingQuiniela();
+            cargarResultados();
           })
-          .catch(function() {});
+          .catch(function() { cargarResultados(); });
         }
 
         function inferirResultadosDeClasificacion() {
@@ -1252,7 +1253,6 @@
         }
 
         cargarClasificaciones();
-        cargarResultados();
         setInterval(cargarClasificaciones, 900000);
 
         function mostrarTab(tab) {
