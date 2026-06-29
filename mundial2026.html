@@ -767,6 +767,33 @@
           return dia+' '+num+' '+mes;
         }
 
+        function resolverPlaceholder(displayName) {
+          if (!displayName) return null;
+          var d = displayName.toLowerCase();
+          var m, g, info;
+          // "1st Place Group A" / "Group A Winner" / "Group A 1st"
+          m = d.match(/group\s+([a-l])\s*(?:winner|1st|first)/i) ||
+              d.match(/(?:1st|winner|first)[^a-l]*group\s+([a-l])/i);
+          if (m) { g = m[1].toUpperCase(); return standingsAPI[g] && standingsAPI[g][0] ? standingsAPI[g][0].fl : null; }
+          // "2nd Place Group A" / "Group A Runner-up"
+          m = d.match(/group\s+([a-l])\s*(?:runner|2nd|second)/i) ||
+              d.match(/(?:2nd|runner|second)[^a-l]*group\s+([a-l])/i);
+          if (m) { g = m[1].toUpperCase(); return standingsAPI[g] && standingsAPI[g][1] ? standingsAPI[g][1].fl : null; }
+          // "Round of 32 3 Winner" → ganador de d16-3
+          m = d.match(/round of 32\D*(\d+)/i);
+          if (m) { info = crucesInfo['d16-'+m[1]]; return info && info.gan ? info.gan : null; }
+          // "Round of 16 3 Winner" → ganador de oct-3
+          m = d.match(/round of 16\D*(\d+)/i);
+          if (m) { info = crucesInfo['oct-'+m[1]]; return info && info.gan ? info.gan : null; }
+          // "Quarterfinal 1 Winner" → ganador de cua-1
+          m = d.match(/quarterfinal\D*(\d+)/i);
+          if (m) { info = crucesInfo['cua-'+m[1]]; return info && info.gan ? info.gan : null; }
+          // "Semifinal 1 Winner/Loser"
+          m = d.match(/semifinal\D*(\d+)\s*(winner|loser)/i);
+          if (m) { info = crucesInfo['sem-'+m[1]]; if (!info) return null; return m[2]==='winner' ? info.gan : (info.fl1===info.gan ? info.fl2 : info.fl1); }
+          return null;
+        }
+
         function procesarResultadosData(data, fecha) {
           if (!data.events) return;
           var huboNuevos = false;
@@ -779,8 +806,8 @@
             var home = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'home'; });
             var away = comp.competitors && comp.competitors.find(function(c) { return c.homeAway === 'away'; });
             if (!home || !away) return;
-            var flHome = idAPI[home.team.id] || buscarFl(home.team.displayName);
-            var flAway = idAPI[away.team.id] || buscarFl(away.team.displayName);
+            var flHome = idAPI[home.team.id] || buscarFl(home.team.displayName) || resolverPlaceholder(home.team.displayName);
+            var flAway = idAPI[away.team.id] || buscarFl(away.team.displayName) || resolverPlaceholder(away.team.displayName);
             if (flHome && home.team.id) idAPI[home.team.id] = flHome;
             if (flAway && away.team.id) idAPI[away.team.id] = flAway;
             var eventDate = new Date(event.date || 0);
