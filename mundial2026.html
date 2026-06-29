@@ -778,9 +778,14 @@
           m = d.match(/group\s+([a-l])\s*(?:runner|2nd|second)/i) ||
               d.match(/(?:2nd|runner|second)[^a-l]*group\s+([a-l])/i);
           if (m) { g = m[1].toUpperCase(); return standingsAPI[g] && standingsAPI[g][1] ? standingsAPI[g][1].fl : null; }
-          // "Round of 32 3 Winner" → ganador de d16-3
+          // "Round of 32 N Winner" → ganador del slot d16 correspondiente
+          // ESPN numera en orden FIFA (M73=1,M74=2,M75=3,M76=4...) ≠ orden cronológico de nuestros slots
           m = d.match(/round of 32\D*(\d+)/i);
-          if (m) { info = crucesInfo['d16-'+m[1]]; return info && info.gan ? info.gan : null; }
+          if (m) {
+            var rof32map={'1':'d16-1','2':'d16-3','3':'d16-4','4':'d16-2','5':'d16-6','6':'d16-5','7':'d16-7','8':'d16-8','9':'d16-10','10':'d16-9','11':'d16-12','12':'d16-11','13':'d16-13','14':'d16-15','15':'d16-16','16':'d16-14'};
+            info = crucesInfo[rof32map[m[1]] || ('d16-'+m[1])];
+            return info && info.gan ? info.gan : null;
+          }
           // "Round of 16 3 Winner" → ganador de oct-3
           m = d.match(/round of 16\D*(\d+)/i);
           if (m) { info = crucesInfo['oct-'+m[1]]; return info && info.gan ? info.gan : null; }
