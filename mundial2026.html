@@ -1527,8 +1527,8 @@
           });
 
           // Left side cards
-          // d16 order: pairs that feed each octavo (oct-1←d16-1,d16-3 | oct-2←d16-2,d16-5 | oct-5←d16-11,d16-12 | oct-6←d16-9,d16-10)
-          [{ci:0,ids:['d16-1','d16-3','d16-2','d16-5','d16-11','d16-12','d16-9','d16-10']},
+          // d16 order: pairs that feed each octavo (oct-1←d16-1,d16-4 | oct-2←d16-3,d16-6 | oct-5←d16-11,d16-12 | oct-6←d16-9,d16-10)
+          [{ci:0,ids:['d16-1','d16-4','d16-3','d16-6','d16-11','d16-12','d16-9','d16-10']},
            {ci:1,ids:['oct-1','oct-2','oct-5','oct-6']},
            {ci:2,ids:['cua-1','cua-2']},
            {ci:3,ids:['sem-1']}
@@ -1547,11 +1547,11 @@
             +'</div>';
 
           // Right side cards
-          // d16 order: pairs that feed each octavo (oct-3←d16-4,d16-6 | oct-4←d16-7,d16-8 | oct-7←d16-14,d16-16 | oct-8←d16-13,d16-15)
+          // d16 order: pairs that feed each octavo (oct-3←d16-2,d16-5 | oct-4←d16-7,d16-8 | oct-7←d16-14,d16-15 | oct-8←d16-13,d16-16)
           [{ci:5,ids:['sem-2']},
            {ci:6,ids:['cua-3','cua-4']},
            {ci:7,ids:['oct-3','oct-4','oct-7','oct-8']},
-           {ci:8,ids:['d16-4','d16-6','d16-7','d16-8','d16-14','d16-16','d16-13','d16-15']}
+           {ci:8,ids:['d16-2','d16-5','d16-7','d16-8','d16-14','d16-15','d16-13','d16-16']}
           ].forEach(function(col){
             var slotH = totalH/col.ids.length;
             col.ids.forEach(function(mid,mi){
