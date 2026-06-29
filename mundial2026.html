@@ -818,6 +818,7 @@
                              && !esPartidoDeGrupos(flHome, flAway);
             var isFinal = statusName === 'STATUS_FINAL' || statusName === 'STATUS_FULL_TIME';
             if (esKnockout) console.log('[CRUCE]', fechaNum, statusName, home.team.displayName, '->', flHome, 'vs', away.team.displayName, '->', flAway);
+            if (esKnockout && (!flHome || !flAway)) console.warn('[SIN-FL]', fechaNum, 'HOME:', JSON.stringify(home.team.displayName), '| AWAY:', JSON.stringify(away.team.displayName));
             if (isFinal && flHome && flAway) {
               var gH = parseInt(home.score) || 0;
               var gA = parseInt(away.score) || 0;
@@ -1132,7 +1133,7 @@
             li.style.opacity = elim ? '0.6' : '';
             li.style.textDecoration = elim ? 'line-through' : '';
             li.style.color = elim ? '#c0392b' : (clas ? '#1b7a1b' : '');
-            li.style.fontWeight = clas ? '700' : '';
+            li.style.fontWeight = (!elim && clas) ? '700' : '';
           });
         }
 
