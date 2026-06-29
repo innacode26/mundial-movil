@@ -383,7 +383,7 @@
   </header>
 
   <nav class="nav-tabs">
-    <button class="activo" onclick="mostrarTab('grupos')">⚽ Grupos</button>
+    <button class="activo" onclick="mostrarTab('grupos')">⚽ Cuadro</button>
     <button onclick="mostrarTab('calendario')">📅 Calendario</button>
     <button onclick="mostrarTab('quiniela')">🏆 Quiniela</button>
   </nav>
@@ -392,8 +392,8 @@
 
     <section id="grupos" class="seccion" style="max-width:none;">
       <div class="sub-tabs" id="grupos-sub-tabs">
-        <button class="activo" onclick="mostrarSubGrupos('grupos')">Grupos</button>
-        <button onclick="mostrarSubGrupos('cruces')">Cuadro Final</button>
+        <button onclick="mostrarSubGrupos('grupos')">Grupos</button>
+        <button class="activo" onclick="mostrarSubGrupos('cruces')">Cuadro Final</button>
       </div>
       <div id="panel-grupos-wrap" style="display:flex; gap:20px; align-items:flex-start;">
       <div id="panel-grupos" class="grupos-grid" style="flex-shrink:0; width:min(1060px, calc(100vw - 40px));">
@@ -754,6 +754,7 @@
             var esKnockout = (ptsRonda > 0 || fechaNum === 20260718 || fechaNum === 20260719)
                              && !esPartidoDeGrupos(flHome, flAway);
             var isFinal = statusName === 'STATUS_FINAL' || statusName === 'STATUS_FULL_TIME';
+            if (esKnockout) console.log('[CRUCE]', fechaNum, statusName, home.team.displayName, '->', flHome, 'vs', away.team.displayName, '->', flAway);
             if (isFinal && flHome && flAway) {
               var gH = parseInt(home.score) || 0;
               var gA = parseInt(away.score) || 0;
@@ -800,10 +801,14 @@
             var fn = parseInt(fechaStr);
             var fd = new Date(Math.floor(fn/10000), Math.floor((fn%10000)/100)-1, fn%100);
             if (fd <= hoy) return; // ya cargado en el bucle anterior
+            console.log('[FETCH-CRUCE]', fechaStr);
             fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=' + fechaStr + '&limit=50')
             .then(function(r) { return r.json(); })
-            .then(function(data) { procesarResultadosData(data, fechaStr); })
-            .catch(function() {});
+            .then(function(data) {
+              console.log('[RESP-CRUCE]', fechaStr, 'eventos:', data.events ? data.events.length : 'sin events', data.events && data.events.map(function(e){return e.name;}));
+              procesarResultadosData(data, fechaStr);
+            })
+            .catch(function(e) { console.log('[ERR-CRUCE]', fechaStr, e); });
           });
         }
 
@@ -1259,12 +1264,12 @@
           if (tab === 'grupos') {
             secGrupos.classList.remove('oculto');
             subTabs.classList.remove('oculto');
-            panelGruposWrap.classList.remove('oculto');
-            panelCruces.classList.add('oculto');
+            panelGruposWrap.classList.add('oculto');
+            panelCruces.classList.remove('oculto');
             panelCal.classList.add('oculto');
-            panelGrupos.classList.remove('oculto');
+            panelGrupos.classList.add('oculto');
             document.querySelectorAll('#grupos-sub-tabs button').forEach(function(b){b.classList.remove('activo');});
-            document.querySelectorAll('#grupos-sub-tabs button')[0].classList.add('activo');
+            document.querySelectorAll('#grupos-sub-tabs button')[1].classList.add('activo');
           } else if (tab === 'calendario') {
             secGrupos.classList.remove('oculto');
             subTabs.classList.add('oculto');
