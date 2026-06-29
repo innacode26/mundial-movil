@@ -588,13 +588,12 @@
           '2-7':   [{l:'Dieciseisavos',fl:'',h:'03:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'21:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'23:00',v:'Por determinar',fv:''}],
           '3-7':   [{l:'Dieciseisavos',fl:'',h:'19:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'22:00',v:'Por determinar',fv:''},{l:'Dieciseisavos',fl:'',h:'23:00',v:'Por determinar',fv:''}],
           '4-7':   [{l:'Octavos de final',fl:'',h:'19:00',v:'Por determinar',fv:''},{l:'Octavos de final',fl:'',h:'23:00',v:'Por determinar',fv:''}],
-          '5-7':   [{l:'Octavos de final',fl:'',h:'22:00',v:'Por determinar',fv:''}],
+          '5-7':   [{l:'Octavos de final',fl:'',h:'19:00',v:'Por determinar',fv:''},{l:'Octavos de final',fl:'',h:'22:00',v:'Por determinar',fv:''}],
           '6-7':   [{l:'Octavos de final',fl:'',h:'02:00',v:'Por determinar',fv:''},{l:'Octavos de final',fl:'',h:'21:00',v:'Por determinar',fv:''}],
-          '7-7':   [{l:'Octavos de final',fl:'',h:'03:00',v:'Por determinar',fv:''},{l:'Octavos de final',fl:'',h:'18:00',v:'Por determinar',fv:''},{l:'Octavos de final',fl:'',h:'22:00',v:'Por determinar',fv:''}],
+          '7-7':   [{l:'Octavos de final',fl:'',h:'03:00',v:'Por determinar',fv:''},{l:'Octavos de final',fl:'',h:'18:00',v:'Por determinar',fv:''}],
           '9-7':   [{l:'Cuartos de final',fl:'',h:'22:00',v:'Por determinar',fv:''}],
           '10-7':  [{l:'Cuartos de final',fl:'',h:'21:00',v:'Por determinar',fv:''}],
-          '11-7':  [{l:'Cuartos de final',fl:'',h:'23:00',v:'Por determinar',fv:''}],
-          '12-7':  [{l:'Cuartos de final',fl:'',h:'03:00',v:'Por determinar',fv:''}],
+          '11-7':  [{l:'Cuartos de final',fl:'',h:'22:00',v:'Por determinar',fv:''},{l:'Cuartos de final',fl:'',h:'23:00',v:'Por determinar',fv:''}],
           '14-7':  [{l:'Semifinal',fl:'',h:'21:00',v:'Por determinar',fv:''}],
           '15-7':  [{l:'Semifinal',fl:'',h:'21:00',v:'Por determinar',fv:''}],
           '18-7':  [{l:'3er y 4º puesto',fl:'',h:'23:00',v:'Por determinar',fv:''}],
@@ -983,20 +982,20 @@
 
         // Mapeo cruce id → entrada en partidos del calendario (key = 'dia-mes', ki = índice entre entradas knockout)
         var crucesAPartidos = {
-          'd16-1': {key:'28-6',ki:0},
-          'd16-2': {key:'29-6',ki:0}, 'd16-3': {key:'29-6',ki:1}, 'd16-4': {key:'29-6',ki:2},
-          'd16-5': {key:'30-6',ki:0}, 'd16-6': {key:'30-6',ki:1}, 'd16-7': {key:'30-6',ki:2},
-          'd16-8': {key:'1-7', ki:0}, 'd16-9': {key:'1-7', ki:1}, 'd16-10':{key:'1-7', ki:2},
-          'd16-11':{key:'2-7', ki:0}, 'd16-12':{key:'2-7', ki:1}, 'd16-13':{key:'2-7', ki:2},
-          'd16-14':{key:'3-7', ki:0}, 'd16-15':{key:'3-7', ki:1}, 'd16-16':{key:'3-7', ki:2},
-          'oct-1': {key:'4-7', ki:0}, 'oct-2': {key:'4-7', ki:1},
-          'oct-3': {key:'5-7', ki:0}, 'oct-4': {key:'5-7', ki:1},
-          'oct-5': {key:'6-7', ki:0}, 'oct-6': {key:'6-7', ki:1},
-          'oct-7': {key:'7-7', ki:0}, 'oct-8': {key:'7-7', ki:1},
-          'cua-1': {key:'9-7', ki:0}, 'cua-2': {key:'10-7',ki:0},
-          'cua-3': {key:'11-7',ki:0}, 'cua-4': {key:'11-7',ki:1},
-          'sem-1': {key:'14-7',ki:0}, 'sem-2': {key:'15-7',ki:0},
-          'ter-1': {key:'18-7',ki:0}, 'fin-1': {key:'19-7',ki:0}
+          'd16-1': {key:'28-6',idx:4},
+          'd16-2': {key:'29-6',idx:0}, 'd16-3': {key:'29-6',idx:1}, 'd16-4': {key:'29-6',idx:2},
+          'd16-5': {key:'30-6',idx:0}, 'd16-6': {key:'30-6',idx:1}, 'd16-7': {key:'30-6',idx:2},
+          'd16-8': {key:'1-7', idx:0}, 'd16-9': {key:'1-7', idx:1}, 'd16-10':{key:'1-7', idx:2},
+          'd16-11':{key:'2-7', idx:0}, 'd16-12':{key:'2-7', idx:1}, 'd16-13':{key:'2-7', idx:2},
+          'd16-14':{key:'3-7', idx:0}, 'd16-15':{key:'3-7', idx:1}, 'd16-16':{key:'3-7', idx:2},
+          'oct-1': {key:'4-7', idx:0}, 'oct-2': {key:'4-7', idx:1},
+          'oct-3': {key:'5-7', idx:0}, 'oct-4': {key:'5-7', idx:1},
+          'oct-5': {key:'6-7', idx:0}, 'oct-6': {key:'6-7', idx:1},
+          'oct-7': {key:'7-7', idx:0}, 'oct-8': {key:'7-7', idx:1},
+          'cua-1': {key:'9-7', idx:0}, 'cua-2': {key:'10-7',idx:0},
+          'cua-3': {key:'11-7',idx:0}, 'cua-4': {key:'11-7',idx:1},
+          'sem-1': {key:'14-7',idx:0}, 'sem-2': {key:'15-7',idx:0},
+          'ter-1': {key:'18-7',idx:0}, 'fin-1': {key:'19-7',idx:0}
         };
 
         var crucesSlotsPorFecha = {
@@ -1598,19 +1597,12 @@
             // Sincronizar con el calendario
             var ap = crucesAPartidos[id];
             if (ap && partidos[ap.key]) {
-              var ki = 0;
-              for (var pi = 0; pi < partidos[ap.key].length; pi++) {
-                var pe = partidos[ap.key][pi];
-                if (!pe.fl && !pe.fv) {
-                  if (ki === ap.ki) {
-                    if (flHome) { pe.l = eq1; pe.fl = flHome; }
-                    if (flAway) { pe.v = eq2; pe.fv = flAway; }
-                    if (eventDate) pe.h = formatearHoraEspana(eventDate);
-                    if (gH !== null) pe._res = gH + '-' + gA;
-                    break;
-                  }
-                  ki++;
-                }
+              var pe = partidos[ap.key][ap.idx];
+              if (pe) {
+                if (flHome) { pe.l = eq1; pe.fl = flHome; }
+                if (flAway) { pe.v = eq2; pe.fv = flAway; }
+                if (eventDate) pe.h = formatearHoraEspana(eventDate);
+                if (gH !== null) pe._res = gH + '-' + gA;
               }
               var keyParts = ap.key.split('-');
               if (diaVisto === parseInt(keyParts[0]) && mesVisto === parseInt(keyParts[1])) {
