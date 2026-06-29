@@ -715,21 +715,37 @@
           return mismoGrupo;
         }
 
+        function normStr(s) {
+          return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+        }
+
         function buscarFl(apiName) {
-          var nombre = apiName.toLowerCase();
+          if (!apiName) return null;
+          var nombre = normStr(apiName);
           var found = null;
-          Object.keys(apiNombres).forEach(function(fl) {
-            apiNombres[fl].forEach(function(n) {
-              if (n.toLowerCase() === nombre) found = fl;
+          // 1. Buscar en gruposData por campo api (nombres esperados de ESPN)
+          Object.keys(gruposData).forEach(function(g) {
+            gruposData[g].forEach(function(eq) {
+              if (!found && normStr(eq.api) === nombre) found = eq.fl;
             });
           });
-          if (!found) {
-            Object.keys(apiNombres).forEach(function(fl) {
-              apiNombres[fl].forEach(function(n) {
-                if (nombre.indexOf(n.toLowerCase()) >= 0 || n.toLowerCase().indexOf(nombre) >= 0) found = fl;
-              });
+          if (found) return found;
+          // 2. Coincidencia exacta normalizada en apiNombres
+          Object.keys(apiNombres).forEach(function(fl) {
+            apiNombres[fl].forEach(function(n) {
+              if (!found && normStr(n) === nombre) found = fl;
             });
-          }
+          });
+          if (found) return found;
+          // 3. Coincidencia parcial normalizada
+          Object.keys(apiNombres).forEach(function(fl) {
+            apiNombres[fl].forEach(function(n) {
+              if (!found) {
+                var nn = normStr(n);
+                if (nombre.indexOf(nn) >= 0 || nn.indexOf(nombre) >= 0) found = fl;
+              }
+            });
+          });
           return found;
         }
 
@@ -747,6 +763,8 @@
             if (!home || !away) return;
             var flHome = idAPI[home.team.id] || buscarFl(home.team.displayName);
             var flAway = idAPI[away.team.id] || buscarFl(away.team.displayName);
+            if (flHome && home.team.id) idAPI[home.team.id] = flHome;
+            if (flAway && away.team.id) idAPI[away.team.id] = flAway;
             var eventDate = new Date(event.date || 0);
             var utcHour = eventDate.getUTCHours();
             var ptsRonda = rondasKnockout[fechaNum] || 0;
@@ -895,16 +913,16 @@
           {id:'d16-16',ronda:'d16',n:16,fecha:'Sáb 4 Jul', hora:'03:30'},
           {id:'oct-1', ronda:'oct',n:1, fecha:'Sáb 4 Jul', hora:'19:00'},
           {id:'oct-2', ronda:'oct',n:2, fecha:'Sáb 4 Jul', hora:'23:00'},
-          {id:'oct-3', ronda:'oct',n:3, fecha:'Dom 5 Jul', hora:'22:00'},
-          {id:'oct-4', ronda:'oct',n:4, fecha:'Lun 6 Jul', hora:'02:00'},
-          {id:'oct-5', ronda:'oct',n:5, fecha:'Lun 6 Jul', hora:'21:00'},
-          {id:'oct-6', ronda:'oct',n:6, fecha:'Mar 7 Jul', hora:'03:00'},
-          {id:'oct-7', ronda:'oct',n:7, fecha:'Mar 7 Jul', hora:'18:00'},
+          {id:'oct-3', ronda:'oct',n:3, fecha:'Dom 5 Jul', hora:'19:00'},
+          {id:'oct-4', ronda:'oct',n:4, fecha:'Dom 5 Jul', hora:'22:00'},
+          {id:'oct-5', ronda:'oct',n:5, fecha:'Lun 6 Jul', hora:'19:00'},
+          {id:'oct-6', ronda:'oct',n:6, fecha:'Lun 6 Jul', hora:'22:00'},
+          {id:'oct-7', ronda:'oct',n:7, fecha:'Mar 7 Jul', hora:'19:00'},
           {id:'oct-8', ronda:'oct',n:8, fecha:'Mar 7 Jul', hora:'22:00'},
           {id:'cua-1', ronda:'cua',n:1, fecha:'Jue 9 Jul', hora:'22:00'},
           {id:'cua-2', ronda:'cua',n:2, fecha:'Vie 10 Jul',hora:'21:00'},
           {id:'cua-3', ronda:'cua',n:3, fecha:'Sáb 11 Jul',hora:'23:00'},
-          {id:'cua-4', ronda:'cua',n:4, fecha:'Dom 12 Jul',hora:'03:00'},
+          {id:'cua-4', ronda:'cua',n:4, fecha:'Sáb 11 Jul',hora:'03:00'},
           {id:'sem-1', ronda:'sem',n:1, fecha:'Mar 14 Jul',hora:'21:00'},
           {id:'sem-2', ronda:'sem',n:2, fecha:'Mié 15 Jul',hora:'21:00'},
           {id:'ter-1', ronda:'ter',n:1, fecha:'Sáb 18 Jul',hora:'23:00'},
@@ -920,10 +938,11 @@
           'd16-12':{key:'3-7', ki:0}, 'd16-13':{key:'3-7', ki:1}, 'd16-14':{key:'3-7', ki:2},
           'd16-15':{key:'4-7', ki:0}, 'd16-16':{key:'4-7', ki:1},
           'oct-1': {key:'4-7', ki:2}, 'oct-2': {key:'4-7', ki:3},
-          'oct-3': {key:'5-7', ki:0}, 'oct-4': {key:'6-7', ki:0}, 'oct-5': {key:'6-7', ki:1},
-          'oct-6': {key:'7-7', ki:0}, 'oct-7': {key:'7-7', ki:1}, 'oct-8': {key:'7-7', ki:2},
+          'oct-3': {key:'5-7', ki:0}, 'oct-4': {key:'5-7', ki:1},
+          'oct-5': {key:'6-7', ki:0}, 'oct-6': {key:'6-7', ki:1},
+          'oct-7': {key:'7-7', ki:0}, 'oct-8': {key:'7-7', ki:1},
           'cua-1': {key:'9-7', ki:0}, 'cua-2': {key:'10-7',ki:0},
-          'cua-3': {key:'11-7',ki:0}, 'cua-4': {key:'12-7',ki:0},
+          'cua-3': {key:'11-7',ki:0}, 'cua-4': {key:'11-7',ki:1},
           'sem-1': {key:'14-7',ki:0}, 'sem-2': {key:'15-7',ki:0},
           'ter-1': {key:'18-7',ki:0}, 'fin-1': {key:'19-7',ki:0}
         };
@@ -937,13 +956,12 @@
           20260703:['d16-12','d16-13','d16-14'],
           '20260704-d16':['d16-15','d16-16'],
           '20260704-oct':['oct-1','oct-2'],
-          20260705:['oct-3'],
-          20260706:['oct-4','oct-5'],
-          20260707:['oct-6','oct-7','oct-8'],
+          20260705:['oct-3','oct-4'],
+          20260706:['oct-5','oct-6'],
+          20260707:['oct-7','oct-8'],
           20260709:['cua-1'],
           20260710:['cua-2'],
-          20260711:['cua-3'],
-          20260712:['cua-4'],
+          20260711:['cua-3','cua-4'],
           20260714:['sem-1'],
           20260715:['sem-2'],
           20260718:['ter-1'],
