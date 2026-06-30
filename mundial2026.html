@@ -1261,48 +1261,53 @@
           fetch('https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings')
           .then(function(r) { return r.json(); })
           .then(function(data) {
-            if (!data.children) return;
-            data.children.forEach(function(group) {
-              var letra = (group.abbreviation || group.name || '').replace(/Group /i,'').trim();
-              if (!letra || letra.length > 1) return;
-              if (!group.standings || !group.standings.entries) return;
-              standingsAPI[letra] = group.standings.entries.map(function(entry) {
-                var apiName = entry.team.displayName || entry.team.location || '';
-                var teamId = entry.team.id || '';
-                var fl = idAPI[teamId] || buscarFl(apiName);
-                var matched = null;
-                if (gruposData[letra]) {
-                  // exact match first
-                  gruposData[letra].forEach(function(eq) {
-                    if (!matched && eq.api.toLowerCase() === apiName.toLowerCase()) matched = eq;
+            try {
+              if (data.children) {
+                data.children.forEach(function(group) {
+                  var letra = (group.abbreviation || group.name || '').replace(/Group /i,'').trim();
+                  if (!letra || letra.length > 1) return;
+                  if (!group.standings || !group.standings.entries) return;
+                  standingsAPI[letra] = group.standings.entries.map(function(entry) {
+                    var apiName = entry.team.displayName || entry.team.location || '';
+                    var teamId = entry.team.id || '';
+                    var fl = idAPI[teamId] || buscarFl(apiName);
+                    var matched = null;
+                    if (gruposData[letra]) {
+                      // exact match first
+                      gruposData[letra].forEach(function(eq) {
+                        if (!matched && eq.api.toLowerCase() === apiName.toLowerCase()) matched = eq;
+                      });
+                      // if no exact match, match by flag code from buscarFl
+                      if (!matched && fl) {
+                        gruposData[letra].forEach(function(eq) {
+                          if (!matched && eq.fl === fl) matched = eq;
+                        });
+                      }
+                    }
+                    if (!fl && matched) fl = matched.fl;
+                    if (teamId && fl) idAPI[teamId] = fl;
+                    if (apiName && fl) espnNombreAPI[normStr(apiName)] = fl;
+                    var stats = {};
+                    (entry.stats || []).forEach(function(s) { stats[s.name] = s.value || 0; });
+                    return {
+                      n: matched ? matched.n : apiName,
+                      fl: fl || (matched ? matched.fl : ''),
+                      pts: stats.points || 0, mp: stats.gamesPlayed || 0,
+                      w: stats.wins || 0, d: stats.ties || 0,
+                      gf: stats.pointsFor || 0, ga: stats.pointsAgainst || 0,
+                      gd: stats.pointDifferential || 0
+                    };
                   });
-                  // if no exact match, match by flag code from buscarFl
-                  if (!matched && fl) {
-                    gruposData[letra].forEach(function(eq) {
-                      if (!matched && eq.fl === fl) matched = eq;
-                    });
-                  }
-                }
-                if (!fl && matched) fl = matched.fl;
-                if (teamId && fl) idAPI[teamId] = fl;
-                if (apiName && fl) espnNombreAPI[normStr(apiName)] = fl;
-                var stats = {};
-                (entry.stats || []).forEach(function(s) { stats[s.name] = s.value || 0; });
-                return {
-                  n: matched ? matched.n : apiName,
-                  fl: fl || (matched ? matched.fl : ''),
-                  pts: stats.points || 0, mp: stats.gamesPlayed || 0,
-                  w: stats.wins || 0, d: stats.ties || 0,
-                  gf: stats.pointsFor || 0, ga: stats.pointsAgainst || 0,
-                  gd: stats.pointDifferential || 0
-                };
-              });
-            });
-            actualizarEliminados();
-            Object.keys(standingsAPI).forEach(function(l) { renderGrupoCard(l); });
-            actualizarEliminadosEnPagina();
-            actualizarPuntosQuiniela();
-            renderRankingQuiniela();
+                });
+                actualizarEliminados();
+                Object.keys(standingsAPI).forEach(function(l) { renderGrupoCard(l); });
+                actualizarEliminadosEnPagina();
+                actualizarPuntosQuiniela();
+                renderRankingQuiniela();
+              }
+            } catch(e) {
+              console.error('[STANDINGS-ERROR]', e);
+            }
             cargarResultados();
           })
           .catch(function() { cargarResultados(); });
