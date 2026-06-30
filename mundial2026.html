@@ -714,6 +714,14 @@
           return mismoGrupo;
         }
 
+        function flToNombre(fl) {
+          var found = null;
+          Object.keys(gruposData).forEach(function(g) {
+            gruposData[g].forEach(function(t) { if (!found && t.fl === fl) found = t.n; });
+          });
+          return found;
+        }
+
         function normStr(s) {
           return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
         }
@@ -806,6 +814,7 @@
           var huboNuevos = false;
           var fechaNum = parseInt(fecha) || 0;
           var huboKnockout = false;
+          var eventosDia = {};
           data.events.forEach(function(event) {
             var comp = event.competitions && event.competitions[0];
             if (!comp) return;
@@ -848,6 +857,42 @@
               // Partido programado: registrar equipos aunque no se haya jugado
               registrarResultadoCruce(fechaNum, utcHour, flHome || null, null, flAway || null, null, '', eventDate);
             }
+            // Recoger evento para actualizar horarios del calendario (solo eliminatoria)
+            if (fechaNum >= 20260628) {
+              var espDate = new Date(eventDate.getTime() + 2*3600*1000);
+              var pKey = espDate.getUTCDate() + '-' + (espDate.getUTCMonth() + 1);
+              if (!eventosDia[pKey]) eventosDia[pKey] = [];
+              eventosDia[pKey].push({
+                date: eventDate,
+                hora: formatearHoraEspana(eventDate),
+                flH: flHome, flA: flAway,
+                lN: flHome ? (flToNombre(flHome) || home.team.displayName) : null,
+                vN: flAway ? (flToNombre(flAway) || away.team.displayName) : null
+              });
+            }
+          });
+          // Actualizar partidos con horarios y equipos reales de la API
+          Object.keys(eventosDia).forEach(function(pKey) {
+            var evs = eventosDia[pKey].sort(function(a, b) { return a.date - b.date; });
+            if (!partidos[pKey]) partidos[pKey] = [];
+            var pts = partidos[pKey];
+            evs.forEach(function(ev, i) {
+              if (ev.flH && ev.flA) {
+                var idx = -1;
+                pts.forEach(function(p, j) { if (p.fl === ev.flH && p.fv === ev.flA) idx = j; });
+                if (idx >= 0) {
+                  pts[idx].h = ev.hora;
+                } else if (pts[i]) {
+                  pts[i].h = ev.hora; pts[i].l = ev.lN; pts[i].fl = ev.flH; pts[i].v = ev.vN; pts[i].fv = ev.flA;
+                } else {
+                  pts.push({l: ev.lN, fl: ev.flH, h: ev.hora, v: ev.vN, fv: ev.flA});
+                }
+              } else if (pts[i]) {
+                pts[i].h = ev.hora;
+              }
+            });
+            pts.sort(function(a, b) { return (a.h || '').localeCompare(b.h || ''); });
+            huboNuevos = true;
           });
           if (huboNuevos && diaVisto !== null) mostrarPartidos(diaVisto, mesVisto);
           if (huboKnockout) {
