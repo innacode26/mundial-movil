@@ -872,26 +872,24 @@
             }
           });
           // Actualizar partidos con horarios y equipos reales de la API
+          var rondasLabels = {'28-6':'Dieciseisavos','29-6':'Dieciseisavos','30-6':'Dieciseisavos','1-7':'Dieciseisavos','2-7':'Dieciseisavos','3-7':'Dieciseisavos','4-7':'Octavos de final','5-7':'Octavos de final','6-7':'Octavos de final','7-7':'Octavos de final','9-7':'Cuartos de final','10-7':'Cuartos de final','11-7':'Cuartos de final','12-7':'Cuartos de final','14-7':'Semifinal','15-7':'Semifinal','18-7':'3er y 4º puesto','19-7':'⭐ FINAL'};
           Object.keys(eventosDia).forEach(function(pKey) {
             var evs = eventosDia[pKey].sort(function(a, b) { return a.date - b.date; });
-            if (!partidos[pKey]) partidos[pKey] = [];
-            var pts = partidos[pKey];
-            evs.forEach(function(ev, i) {
-              if (ev.flH && ev.flA) {
-                var idx = -1;
-                pts.forEach(function(p, j) { if (p.fl === ev.flH && p.fv === ev.flA) idx = j; });
-                if (idx >= 0) {
-                  pts[idx].h = ev.hora;
-                } else if (pts[i]) {
-                  pts[i].h = ev.hora; pts[i].l = ev.lN; pts[i].fl = ev.flH; pts[i].v = ev.vN; pts[i].fv = ev.flA;
-                } else {
-                  pts.push({l: ev.lN, fl: ev.flH, h: ev.hora, v: ev.vN, fv: ev.flA});
-                }
-              } else if (pts[i]) {
-                pts[i].h = ev.hora;
-              }
+            var label = rondasLabels[pKey] || '';
+            var pts = partidos[pKey] || [];
+            // Partidos de grupo: solo actualizamos la hora
+            var grupoEvs = evs.filter(function(ev) { return ev.flH && ev.flA && esPartidoDeGrupos(ev.flH, ev.flA); });
+            grupoEvs.forEach(function(ev) {
+              pts.forEach(function(p) { if (p.fl === ev.flH && p.fv === ev.flA) p.h = ev.hora; });
             });
-            pts.sort(function(a, b) { return (a.h || '').localeCompare(b.h || ''); });
+            // Partidos de eliminatoria: reconstruimos desde la API
+            var knockoutEvs = evs.filter(function(ev) { return !ev.flH || !ev.flA || !esPartidoDeGrupos(ev.flH, ev.flA); });
+            var grupoEntries = pts.filter(function(p) { return p.fl && p.fv && esPartidoDeGrupos(p.fl, p.fv); });
+            var knockoutEntries = knockoutEvs.map(function(ev) {
+              return {l: ev.flH ? (ev.lN || label) : label, fl: ev.flH || '', h: ev.hora, v: ev.flA ? (ev.vN || 'Por determinar') : 'Por determinar', fv: ev.flA || ''};
+            });
+            partidos[pKey] = grupoEntries.concat(knockoutEntries);
+            partidos[pKey].sort(function(a, b) { return (a.h || '').localeCompare(b.h || ''); });
             huboNuevos = true;
           });
           if (huboNuevos && diaVisto !== null) mostrarPartidos(diaVisto, mesVisto);
