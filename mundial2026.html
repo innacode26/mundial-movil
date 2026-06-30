@@ -1013,11 +1013,11 @@
 
         var crucesSlotsPorFecha = {
           20260628:['d16-1'],
-          20260629:['d16-2','d16-3'],
-          20260630:['d16-4','d16-5','d16-6'],
-          20260701:['d16-7','d16-8','d16-9'],
-          20260702:['d16-10','d16-11','d16-12'],
-          20260703:['d16-13','d16-14','d16-15','d16-16'],
+          20260629:['d16-2','d16-3','d16-4'],
+          20260630:['d16-5','d16-6','d16-7'],
+          20260701:['d16-8','d16-9','d16-10'],
+          20260702:['d16-11','d16-12','d16-13'],
+          20260703:['d16-14','d16-15','d16-16'],
           20260704:['oct-1','oct-2'],
           20260705:['oct-3'],
           20260706:['oct-4','oct-5','oct-6'],
@@ -1261,7 +1261,7 @@
           fetch('https://site.api.espn.com/apis/v2/sports/soccer/fifa.world/standings')
           .then(function(r) { return r.json(); })
           .then(function(data) {
-            if (!data.children) { cargarResultados(); return; }
+            if (!data.children) return;
             data.children.forEach(function(group) {
               var letra = (group.abbreviation || group.name || '').replace(/Group /i,'').trim();
               if (!letra || letra.length > 1) return;
