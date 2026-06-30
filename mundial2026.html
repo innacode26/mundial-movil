@@ -882,15 +882,17 @@
             grupoEvs.forEach(function(ev) {
               pts.forEach(function(p) { if (p.fl === ev.flH && p.fv === ev.flA) p.h = ev.hora; });
             });
-            // Partidos de eliminatoria: reconstruimos desde la API
+            // Partidos de eliminatoria: reconstruimos desde la API solo si hay datos
             var knockoutEvs = evs.filter(function(ev) { return !ev.flH || !ev.flA || !esPartidoDeGrupos(ev.flH, ev.flA); });
             var grupoEntries = pts.filter(function(p) { return p.fl && p.fv && esPartidoDeGrupos(p.fl, p.fv); });
-            var knockoutEntries = knockoutEvs.map(function(ev) {
-              return {l: ev.flH ? (ev.lN || label) : label, fl: ev.flH || '', h: ev.hora, v: ev.flA ? (ev.vN || 'Por determinar') : 'Por determinar', fv: ev.flA || ''};
-            });
-            partidos[pKey] = grupoEntries.concat(knockoutEntries);
-            partidos[pKey].sort(function(a, b) { return (a.h || '').localeCompare(b.h || ''); });
-            huboNuevos = true;
+            if (knockoutEvs.length > 0) {
+              var knockoutEntries = knockoutEvs.map(function(ev) {
+                return {l: ev.flH ? (ev.lN || label) : label, fl: ev.flH || '', h: ev.hora, v: ev.flA ? (ev.vN || 'Por determinar') : 'Por determinar', fv: ev.flA || ''};
+              });
+              partidos[pKey] = grupoEntries.concat(knockoutEntries);
+              partidos[pKey].sort(function(a, b) { return (a.h || '').localeCompare(b.h || ''); });
+              huboNuevos = true;
+            }
           });
           if (huboNuevos && diaVisto !== null) mostrarPartidos(diaVisto, mesVisto);
           if (huboKnockout) {
