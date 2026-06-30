@@ -745,6 +745,9 @@
               }
             });
           });
+          if (found) return found;
+          // 4. Nombre exacto que ESPN devolvió en clasificaciones (capturado dinámicamente)
+          if (espnNombreAPI[nombre]) return espnNombreAPI[nombre];
           return found;
         }
 
@@ -814,6 +817,8 @@
             var flAway = idAPI[away.team.id] || buscarFl(away.team.displayName) || resolverPlaceholder(away.team.displayName);
             if (flHome && home.team.id) idAPI[home.team.id] = flHome;
             if (flAway && away.team.id) idAPI[away.team.id] = flAway;
+            if (flHome && home.team.displayName) espnNombreAPI[normStr(home.team.displayName)] = flHome;
+            if (flAway && away.team.displayName) espnNombreAPI[normStr(away.team.displayName)] = flAway;
             var eventDate = new Date(event.date || 0);
             var utcHour = eventDate.getUTCHours();
             var ptsRonda = rondasKnockout[fechaNum] || 0;
@@ -857,24 +862,26 @@
           crucesInfo = {};
           crucesFechaIdx = {};
           var hoy = new Date();
-          // Fase de grupos (pasados)
+          // Fechas de eliminatoria (todas, incluyendo casos especiales sin puntos)
+          var fechasKnockout = {'20260628':1,'20260629':1,'20260630':1,'20260701':1,'20260702':1,'20260703':1,'20260704':1,
+            '20260705':1,'20260706':1,'20260707':1,'20260709':1,'20260710':1,'20260711':1,'20260712':1,
+            '20260714':1,'20260715':1,'20260718':1,'20260719':1};
+          // Fase de grupos (pasados, solo fechas que NO son eliminatorias)
           for (var i = 0; i <= 40; i++) {
             var d = new Date(2026, 5, 11 + i);
             if (d > hoy) break;
             (function(fecha) {
+              if (fechasKnockout[fecha]) return; // knockout se carga abajo
               fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=' + fecha + '&limit=50')
               .then(function(r) { return r.json(); })
               .then(function(data) { procesarResultadosData(data, fecha); })
               .catch(function() {});
             })('' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0'));
           }
-          // Eliminatorias: también futuras, para ver equipos ya programados
+          // Eliminatorias: pasadas y futuras (con logging para diagnóstico)
           ['20260628','20260629','20260630','20260701','20260702','20260703','20260704',
            '20260705','20260706','20260707','20260709','20260710','20260711','20260712',
            '20260714','20260715','20260718','20260719'].forEach(function(fechaStr) {
-            var fn = parseInt(fechaStr);
-            var fd = new Date(Math.floor(fn/10000), Math.floor((fn%10000)/100)-1, fn%100);
-            if (fd <= hoy) return; // ya cargado en el bucle anterior
             console.log('[FETCH-CRUCE]', fechaStr);
             fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=' + fechaStr + '&limit=50')
             .then(function(r) { return r.json(); })
@@ -943,6 +950,7 @@
         var crucesInfo = {};
         var crucesFechaIdx = {};
         var idAPI = {}; // ESPN team ID → flag code
+        var espnNombreAPI = {}; // ESPN displayName normalizado → flag code
 
         var crucesRondaColores = {
           d16:'rgba(220,120,0,0.92)', oct:'rgba(200,50,30,0.92)',
@@ -1277,6 +1285,7 @@
                 }
                 if (!fl && matched) fl = matched.fl;
                 if (teamId && fl) idAPI[teamId] = fl;
+                if (apiName && fl) espnNombreAPI[normStr(apiName)] = fl;
                 var stats = {};
                 (entry.stats || []).forEach(function(s) { stats[s.name] = s.value || 0; });
                 return {
