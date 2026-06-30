@@ -825,7 +825,7 @@
             if (fechaNum === 20260704) ptsRonda = utcHour < 12 ? 4 : 5;
             var esKnockout = (ptsRonda > 0 || fechaNum === 20260718 || fechaNum === 20260719)
                              && !esPartidoDeGrupos(flHome, flAway);
-            var isFinal = statusName === 'STATUS_FINAL' || statusName === 'STATUS_FULL_TIME';
+            var isFinal = !!(statusName && (statusName.indexOf('FINAL') >= 0 || statusName.indexOf('FULL_TIME') >= 0));
             if (esKnockout) console.log('[CRUCE]', fechaNum, statusName, home.team.displayName, '->', flHome, 'vs', away.team.displayName, '->', flAway);
             if (esKnockout && (!flHome || !flAway)) console.warn('[SIN-FL]', fechaNum, 'HOME:', JSON.stringify(home.team.displayName), '| AWAY:', JSON.stringify(away.team.displayName));
             if (isFinal && flHome && flAway) {
@@ -835,8 +835,8 @@
               resultadosCache[flAway + '-' + flHome] = gA + '-' + gH;
               huboNuevos = true;
               if (esKnockout) {
-                var flGanador = gH !== gA ? (gH > gA ? flHome : flAway) : '';
-                if (ptsRonda > 0 && gH !== gA) {
+                var flGanador = home.winner ? flHome : (away.winner ? flAway : (gH > gA ? flHome : (gA > gH ? flAway : '')));
+                if (ptsRonda > 0 && flGanador) {
                   vicKnockout[flGanador] = (vicKnockout[flGanador] || 0) + ptsRonda;
                   huboKnockout = true;
                   var flPerdedor = flGanador === flHome ? flAway : flHome;
