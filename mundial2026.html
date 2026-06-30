@@ -1634,7 +1634,7 @@
           panelEq.classList.add('oculto');
           panelClas.classList.add('oculto');
           if (sub === 'equipos') panelEq.classList.remove('oculto');
-          else panelClas.classList.remove('oculto');
+          else { panelClas.classList.remove('oculto'); renderRankingQuiniela(); }
           document.querySelectorAll('#quiniela .sub-tabs button').forEach(function(b) { b.classList.remove('activo'); });
           document.querySelectorAll('#quiniela .sub-tabs button')[sub === 'equipos' ? 0 : 1].classList.add('activo');
         }
