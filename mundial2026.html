@@ -858,8 +858,8 @@
                 date: eventDate,
                 hora: formatearHoraEspana(eventDate),
                 flH: flHome, flA: flAway,
-                lN: flHome ? (flToNombre(flHome) || home.team.displayName) : null,
-                vN: flAway ? (flToNombre(flAway) || away.team.displayName) : null
+                lN: flHome ? (buscarNombrePorFl(flHome) || home.team.displayName) : null,
+                vN: flAway ? (buscarNombrePorFl(flAway) || away.team.displayName) : null
               });
             }
           });
