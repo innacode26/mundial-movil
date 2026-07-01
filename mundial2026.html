@@ -549,7 +549,7 @@
       </div>
 
       <script>
-        var mesActual = 0; // 0=junio, 1=julio
+        var mesActual = (new Date().getMonth() >= 6) ? 1 : 0; // 0=junio, 1=julio
         var meses = ['JUNIO <span style="color:var(--dorado)">2026</span>', 'JULIO <span style="color:var(--dorado)">2026</span>'];
 
         // junio: empieza lunes(0 offset), 30 días
@@ -714,14 +714,6 @@
           return mismoGrupo;
         }
 
-        function flToNombre(fl) {
-          var found = null;
-          Object.keys(gruposData).forEach(function(g) {
-            gruposData[g].forEach(function(t) { if (!found && t.fl === fl) found = t.n; });
-          });
-          return found;
-        }
-
         function normStr(s) {
           return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
         }
@@ -855,7 +847,7 @@
               }
             } else if (esKnockout && !isFinal) {
               // Partido programado: registrar equipos aunque no se haya jugado
-              registrarResultadoCruce(fechaNum, utcHour, flHome || null, null, flAway || null, null, '', eventDate);
+              registrarResultadoCruce(fechaNum, utcHour, flHome || null, null, flAway || null, null, '', eventDate, home.team.displayName, away.team.displayName);
             }
             // Recoger evento para actualizar horarios del calendario (solo eliminatoria)
             if (fechaNum >= 20260628) {
@@ -900,12 +892,14 @@
             actualizarPuntosQuiniela();
             actualizarEliminadosEnPagina();
           }
+          resolverPendientes();
         }
 
         function cargarResultados() {
           vicKnockout = {};
           crucesInfo = {};
           crucesFechaIdx = {};
+          pendingCruces = {};
           var hoy = new Date();
           // Fechas de eliminatoria (todas, incluyendo casos especiales sin puntos)
           var fechasKnockout = {'20260628':1,'20260629':1,'20260630':1,'20260701':1,'20260702':1,'20260703':1,'20260704':1,
@@ -994,6 +988,7 @@
         var vicKnockout = {};
         var crucesInfo = {};
         var crucesFechaIdx = {};
+        var pendingCruces = {}; // slots pendientes cuando el resultado del partido anterior aún no estaba disponible
         var idAPI = {}; // ESPN team ID → flag code
         var espnNombreAPI = {}; // ESPN displayName normalizado → flag code
 
@@ -1636,7 +1631,39 @@
           wrap.innerHTML = html;
         }
 
-        function registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador, eventDate) {
+        function resolverPendientes() {
+          Object.keys(pendingCruces).forEach(function(slotId) {
+            var p = pendingCruces[slotId];
+            var flH = resolverPlaceholder(p.rawHome);
+            var flA = resolverPlaceholder(p.rawAway);
+            if (flH || flA) {
+              var eq1 = flH ? buscarNombrePorFl(flH) : 'Por determinar';
+              var eq2 = flA ? buscarNombrePorFl(flA) : 'Por determinar';
+              crucesInfo[slotId] = {fl1:flH||'', eq1:eq1, g1:null, fl2:flA||'', eq2:eq2, g2:null, gan:''};
+              if (p.eventDate) {
+                for (var ci = 0; ci < crucesPartidos.length; ci++) {
+                  if (crucesPartidos[ci].id === slotId) {
+                    crucesPartidos[ci].hora = formatearHoraEspana(p.eventDate);
+                    crucesPartidos[ci].fecha = formatearFechaEspana(p.eventDate);
+                    break;
+                  }
+                }
+              }
+              actualizarCrucesCard(slotId);
+              var ap = crucesAPartidos[slotId];
+              if (ap && partidos[ap.key]) {
+                var pe = partidos[ap.key][ap.idx];
+                if (pe) {
+                  if (flH) { pe.l = eq1; pe.fl = flH; }
+                  if (flA) { pe.v = eq2; pe.fv = flA; }
+                }
+              }
+              if (flH && flA) delete pendingCruces[slotId];
+            }
+          });
+        }
+
+        function registrarResultadoCruce(fechaNum, utcHour, flHome, gH, flAway, gA, flGanador, eventDate, rawHome, rawAway) {
           var slotKey = fechaNum;
           var slots = crucesSlotsPorFecha[slotKey];
           if (!slots) { console.log('[REG] slotKey', slotKey, '-> SIN SLOTS'); return; }
@@ -1660,6 +1687,7 @@
               }
             }
             actualizarCrucesCard(id);
+            if (flGanador) resolverPendientes();
             // Sincronizar con el calendario
             var ap = crucesAPartidos[id];
             if (ap && partidos[ap.key]) {
@@ -1675,6 +1703,10 @@
                 mostrarPartidos(diaVisto, mesVisto);
               }
             }
+          } else if (rawHome && rawAway) {
+            // Ambos equipos sin resolver (resultado anterior aún no cargado) — guardar como pendiente
+            crucesFechaIdx[slotKey]++;
+            pendingCruces[id] = {rawHome: rawHome, rawAway: rawAway, eventDate: eventDate};
           }
         }
 
